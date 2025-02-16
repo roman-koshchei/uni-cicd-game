@@ -1,7 +1,7 @@
 [project]
 name = "uni-cicd-game"
 version = "0.1.0"
-description = "Add your description here"
+description = "PacMan game for CI/CD classes in University"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
