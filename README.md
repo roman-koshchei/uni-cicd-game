@@ -16,7 +16,7 @@ We use Mermaid js to create and display diagrams. It's supported by GitHub as we
 
 ```mermaid
 graph TD
-  player(Player) -->|Control| PacMan
+  Player -->|Control| PacMan
   PacMan -->|Eats| Dots
   PacMan -->|Eats| PowerPellets
   PacMan -->|Avoids| Ghosts
