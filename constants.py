@@ -17,3 +17,13 @@ LEFT = 2
 RIGHT = -2
 
 PACMAN = 0
+GHOST=3
+
+PELLET=1
+POWERPELLET=2
+
+# Modes for the ghosts
+SCATTER = 0
+CHASE = 1
+FREIGHT = 2
+SPAWN = 3

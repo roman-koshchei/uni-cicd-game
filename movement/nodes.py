@@ -1,6 +1,7 @@
 import pygame
 from movement.vector import Vector2
 from constants import *
+import numpy as np
 
 class Node:
     def __init__(self, x, y):
@@ -17,8 +18,31 @@ class Node:
 
 
 class NodeGroup:
-    def __init__(self):
+    def __init__(self, level):
+        self.level = level
+        self.nodesLUT = {}
+        self.nodeSymbols = ['+', 'P', 'n']
+        self.pathSymbols = ['.', '-', '|', 'p']
         self.node_list = []
+        self.home_key = None
+
+    def create_home_nodes(self, xoffset, yoffset):
+        homedata = np.array([['X','X','+','X','X'],
+                             ['X','X','.','X','X'],
+                             ['+','X','.','X','+'],
+                             ['+','.','+','.','+'],
+                             ['+','X','X','X','+']])
+
+        self.createNodeTable(homedata, xoffset, yoffset)
+        self.connectHorizontally(homedata, xoffset, yoffset)
+        self.connectVertically(homedata, xoffset, yoffset)
+        self.homekey = self.constructKey(xoffset+2, yoffset)
+        return self.homekey
+    
+    def connect_home_nodes(self, homekey, otherkey, direction):     
+        key = self.constructKey(*otherkey)
+        self.nodesLUT[homekey].neighbors[direction] = self.nodesLUT[key]
+        self.nodesLUT[key].neighbors[direction*-1] = self.nodesLUT[homekey]
 
     def setup_test_nodes(self):
         node_a = Node(80, 80)

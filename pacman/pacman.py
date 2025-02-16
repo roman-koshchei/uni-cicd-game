@@ -2,9 +2,11 @@ import pygame
 from pygame.locals import *
 from movement.vector import Vector2
 from constants import *
+from ghosts.entity import Entity
 
 class Pacman:
     def __init__(self, node):
+        Entity.__init__(self, node)
         self.name = PACMAN
         self.position = Vector2(200, 400)
         self.directions = {
@@ -21,6 +23,24 @@ class Pacman:
         self.node = node
         self.set_position()
         self.target = node
+        self.collide_radius = 5
+
+    def eat_pellets(self, pelletList):
+        for pellet in pelletList:
+            if self.collide_check(pellet):
+                return pellet
+        return None
+    
+    def collide_ghost(self, ghost):
+        return self.collide_check(ghost)
+
+    def collide_check(self, other):
+        d = self.position - other.position
+        dSquared = d.magnitude_squared()
+        rSquared = (self.collide_radius + other.collide_radius)**2
+        if dSquared <= rSquared:
+            return True
+        return False
 
     def set_position(self):
         self.position = self.node.position.copy()
