@@ -18,7 +18,7 @@ class GameController:
 
     def start_game(self):
         self.set_background()
-        self.nodes = NodeGroup("mazetest.txt")
+        self.nodes = NodeGroup("maze.txt")
         self.pacman = Pacman(self.nodes.start_temp_node())
 
     def update(self):
