@@ -19,13 +19,11 @@ class GameController:
 
     def start_game(self):
         self.set_background()    
-        self.nodes = NodeGroup()
-        self.nodes.setup_test_nodes()
-        # will be self.nodes = NodeGroup("maze.txt")
+        self.nodes = NodeGroup("maze.txt")
         home_key = self.nodes.create_home_nodes(11.5, 14)
         self.nodes.connect_home_nodes(home_key, (12,14), LEFT)
         self.nodes.connect_home_nodes(home_key, (15,14), RIGHT)
-        self.pacman = Pacman(self.nodes.node_list[0])
+        self.pacman = Pacman(self.nodes.start_remp_node())
         self.pellet = PelletGroup("maze.txt")
         self.ghost = Ghost(self.nodes.getStartTempNode(), self.pacman)
         self.ghost.set_spawn_node(self.nodes.get_node_from_tiles(2+11.5, 3+14))
@@ -65,6 +63,7 @@ class GameController:
         self.pacman.render(self.screen)
         self.ghost.render(self.screen)
         pygame.display.update()
+
 
 if __name__ == "__main__":
     game = GameController()
