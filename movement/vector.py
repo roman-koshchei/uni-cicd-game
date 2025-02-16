@@ -1,5 +1,6 @@
 import math
 
+
 class Vector2:
     def __init__(self, x=0, y=0):
         self.x = x
@@ -22,10 +23,12 @@ class Vector2:
         return Vector2(self.x / scalar, self.y / scalar) if scalar != 0 else None
 
     def __eq__(self, other):
-        return abs(self.x - other.x) < self.thresh and abs(self.y - other.y) < self.thresh
+        return (
+            abs(self.x - other.x) < self.thresh and abs(self.y - other.y) < self.thresh
+        )
 
     def magnitude_squared(self):
-        return self.x ** 2 + self.y ** 2
+        return self.x**2 + self.y**2
 
     def magnitude(self):
         return math.sqrt(self.magnitude_squared())

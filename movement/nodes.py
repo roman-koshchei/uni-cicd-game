@@ -1,4 +1,6 @@
 import pygame
+import numpy as np
+from typing import Dict, Tuple
 from movement.vector import Vector2
 from constants import *
 
@@ -17,43 +19,73 @@ class Node:
 
 
 class NodeGroup:
-    def __init__(self):
-        self.node_list = []
+    def __init__(self, level: str):
+        self.node_table: Dict[Tuple[int, int], Node] = {}
+        self.level = level
+        self.node_symbols = ["+"]
+        self.path_symbols = ["."]
 
-    def setup_test_nodes(self):
-        node_a = Node(80, 80)
-        node_b = Node(160, 80)
-        node_c = Node(80, 160)
-        node_d = Node(160, 160)
-        node_e = Node(208, 160)
-        node_f = Node(80, 320)
-        node_g = Node(208, 320)
-
-        node_a.neighbors[RIGHT] = node_b
-        node_a.neighbors[DOWN] = node_c
-
-        node_b.neighbors[LEFT] = node_a
-        node_b.neighbors[DOWN] = node_d
-
-        node_c.neighbors[UP] = node_a
-        node_c.neighbors[RIGHT] = node_d
-        node_c.neighbors[DOWN] = node_f
-
-        node_d.neighbors[UP] = node_b
-        node_d.neighbors[LEFT] = node_c
-        node_d.neighbors[RIGHT] = node_e
-
-        node_e.neighbors[LEFT] = node_d
-        node_e.neighbors[DOWN] = node_g
-
-        node_f.neighbors[UP] = node_c
-        node_f.neighbors[RIGHT] = node_g
-
-        node_g.neighbors[UP] = node_e
-        node_g.neighbors[LEFT] = node_f
-
-        self.node_list = [node_a, node_b, node_c, node_d, node_e, node_f, node_g]
+        data = self.read_maze_file(level)
+        self.create_node_table(data)
+        self.connect_horizontally(data)
+        self.connect_vertically(data)
 
     def render(self, screen):
-        for node in self.node_list:
+        for node in self.node_table.values():
             node.render(screen)
+
+    def read_maze_file(self, file: str):
+        return np.loadtxt(file, dtype="<U1")
+
+    def create_node_table(self, data: np.ndarray, xoffset=0, yoffset=0):
+        for row in list(range(data.shape[0])):
+            for col in list(range(data.shape[1])):
+                if data[row][col] in self.node_symbols:
+                    x, y = self.create_key(col + xoffset, row + yoffset)
+                    self.node_table[(x, y)] = Node(x, y)
+
+    def create_key(self, x: int, y: int):
+        return x * TILEWIDTH, y * TILEHEIGHT
+
+    def connect_horizontally(self, data, xoffset=0, yoffset=0):
+        for row in list(range(data.shape[0])):
+            key = None
+            for col in list(range(data.shape[1])):
+                if data[row][col] in self.node_symbols:
+                    if key is None:
+                        key = self.create_key(col + xoffset, row + yoffset)
+                    else:
+                        otherkey = self.create_key(col + xoffset, row + yoffset)
+                        self.node_table[key].neighbors[RIGHT] = self.node_table[otherkey]
+                        self.node_table[otherkey].neighbors[LEFT] = self.node_table[key]
+                        key = otherkey
+                elif data[row][col] not in self.path_symbols:
+                    key = None
+
+    def connect_vertically(self, data, xoffset=0, yoffset=0):
+        dataT = data.transpose()
+        for col in list(range(dataT.shape[0])):
+            key = None
+            for row in list(range(dataT.shape[1])):
+                if dataT[col][row] in self.node_symbols:
+                    if key is None:
+                        key = self.create_key(col + xoffset, row + yoffset)
+                    else:
+                        otherkey = self.create_key(col + xoffset, row + yoffset)
+                        self.node_table[key].neighbors[DOWN] = self.node_table[otherkey]
+                        self.node_table[otherkey].neighbors[UP] = self.node_table[key]
+                        key = otherkey
+                elif dataT[col][row] not in self.path_symbols:
+                    key = None
+
+    def node_from_pixels(self, xpixel, ypixel):
+        if (xpixel, ypixel) in self.node_table.keys():
+            return self.node_table[(xpixel, ypixel)]
+        return None
+
+    def node_from_tiles(self, col: int, row: int):
+        x, y = self.create_key(col, row)
+        return self.node_table[(x, y)] if (x, y) in self.node_table.keys() else None
+
+    def start_temp_node(self) -> Node:
+        return next(iter(self.node_table.values()), None)

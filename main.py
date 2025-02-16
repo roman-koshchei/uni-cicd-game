@@ -4,6 +4,7 @@ from constants import *
 from pacman.pacman import Pacman
 from movement.nodes import NodeGroup
 
+
 class GameController:
     def __init__(self):
         pygame.init()
@@ -16,10 +17,9 @@ class GameController:
         self.background.fill(BLACK)
 
     def start_game(self):
-        self.set_background()    
-        self.nodes = NodeGroup()
-        self.nodes.setup_test_nodes()
-        self.pacman = Pacman(self.nodes.node_list[0])
+        self.set_background()
+        self.nodes = NodeGroup("mazetest.txt")
+        self.pacman = Pacman(self.nodes.start_temp_node())
 
     def update(self):
         dt = self.clock.tick(30) / 1000.0
@@ -37,6 +37,7 @@ class GameController:
         self.nodes.render(self.screen)
         self.pacman.render(self.screen)
         pygame.display.update()
+
 
 if __name__ == "__main__":
     game = GameController()
