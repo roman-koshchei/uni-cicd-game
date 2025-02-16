@@ -1,6 +1,6 @@
 import pygame
 from pygame.locals import *
-from vector import Vector2
+from movement.vector import Vector2
 from constants import *
 
 class Pacman(object):
