@@ -3,55 +3,56 @@ from pygame.locals import *
 from movement.vector import Vector2
 from constants import *
 
-class Pacman(object):
+class Pacman:
     def __init__(self, node):
         self.name = PACMAN
         self.position = Vector2(200, 400)
-        self.directions = {UP:Vector2(0, -1), DOWN:Vector2(0, 1), 
-                           LEFT:Vector2(-1, 0), RIGHT:Vector2(1, 0), STOP:Vector2()}
+        self.directions = {
+            UP: Vector2(0, -1),
+            DOWN: Vector2(0, 1),
+            LEFT: Vector2(-1, 0),
+            RIGHT: Vector2(1, 0),
+            STOP: Vector2()
+        }
         self.direction = STOP
         self.speed = 100
         self.radius = 10
         self.color = YELLOW
         self.node = node
-        self.setPosition()
+        self.set_position()
         self.target = node
 
-    def setPosition(self):
+    def set_position(self):
         self.position = self.node.position.copy()
 
-    def update(self, dt):	
-        self.position += self.directions[self.direction]*self.speed*dt
-        direction = self.getValidKey()
+    def update(self, dt):    
+        self.position += self.directions[self.direction] * self.speed * dt
+        direction = self.get_valid_key()
         
-        if self.overshotTarget():
+        if self.overshot_target():
             self.node = self.target
-            self.target = self.getNewTarget(direction)
+            self.target = self.get_new_target(direction)
+            
             if self.target is not self.node:
                 self.direction = direction
             else:
-                self.target = self.getNewTarget(self.direction)
+                self.target = self.get_new_target(self.direction)
 
             if self.target is self.node:
                 self.direction = STOP
-            self.setPosition()
+
+            self.set_position()
         else: 
-            if self.oppositeDirection(direction):
-                self.reverseDirection()
+            if self.is_opposite_direction(direction):
+                self.reverse_direction()
 
+    def is_valid_direction(self, direction):
+        return direction is not STOP and self.node.neighbors[direction] is not None
 
-    def validDirection(self, direction):
-        if direction is not STOP:
-            if self.node.neighbors[direction] is not None:
-                return True
-        return False
+    def get_new_target(self, direction):
+        return self.node.neighbors[direction] if self.is_valid_direction(direction) else self.node
 
-    def getNewTarget(self, direction):
-        if self.validDirection(direction):
-            return self.node.neighbors[direction]
-        return self.node
-
-    def getValidKey(self):
+    def get_valid_key(self):
         key_pressed = pygame.key.get_pressed()
         if key_pressed[K_UP] or key_pressed[K_w]:
             return UP
@@ -63,28 +64,19 @@ class Pacman(object):
             return RIGHT
         return STOP
     
-    def reverseDirection(self):
+    def reverse_direction(self):
         self.direction *= -1
-        temp = self.node
-        self.node = self.target
-        self.target = temp
+        self.node, self.target = self.target, self.node
 
-    def oppositeDirection(self, direction):
-        if direction is not STOP:
-            if direction == self.direction * -1:
-                return True
-        return False
+    def is_opposite_direction(self, direction):
+        return direction is not STOP and direction == -self.direction
     
-    def overshotTarget(self):
-        if self.target is not None:
+    def overshot_target(self):
+        if self.target:
             vec1 = self.target.position - self.node.position
             vec2 = self.position - self.node.position
-            node2Target = vec1.magnitudeSquared()
-            node2Self = vec2.magnitudeSquared()
-            return node2Self >= node2Target
+            return vec2.magnitude_squared() >= vec1.magnitude_squared()
         return False
     
     def render(self, screen):
-        p = self.position.asInt()
-        pygame.draw.circle(screen, self.color, p, self.radius)
-
+        pygame.draw.circle(screen, self.color, self.position.as_int(), self.radius)
