@@ -4,21 +4,20 @@ from movement.vector import Vector2
 from constants import *
 from random import randint
 
-class Entity:
+class Entity(object):
     def __init__(self, node):
         self.name = None
         self.directions = {UP:Vector2(0, -1),DOWN:Vector2(0, 1), 
                           LEFT:Vector2(-1, 0), RIGHT:Vector2(1, 0), STOP:Vector2()}
         self.direction = STOP
-        self.setSpeed(100)
+        self.set_speed(100)
         self.radius = 10
         self.collideRadius = 5
         self.color = WHITE
         self.node = node
-        self.setPosition()
+        self.set_position()
         self.target = node
         self.visible = True
-        self.disablePortal = False
         self.goal = None
         self.direction_method = self.random_direction
 
@@ -29,10 +28,6 @@ class Entity:
             self.node = self.target
             directions = self.valid_directions()
             direction = self.direction_method(directions)
-            if not self.disablePortal:
-                # todo: implement portal
-                if self.node.neighbors[PORTAL] is not None:
-                    self.node = self.node.neighbors[PORTAL]
             self.target = self.get_new_target(direction)
             if self.target is not self.node:
                 self.direction = direction
@@ -102,5 +97,5 @@ class Entity:
 
     def render(self, screen):
         if self.visible:
-            p = self.position.asInt()
+            p = self.position.as_int()
             pygame.draw.circle(screen, self.color, p, self.radius)

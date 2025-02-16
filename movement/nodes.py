@@ -19,23 +19,38 @@ class Node:
                 pygame.draw.circle(screen, RED, self.position.as_int(), 12)
 
 
-class NodeGroup:
+class NodeGroup(object):
     def __init__(self, level: str):
         self.node_table: Dict[Tuple[int, int], Node] = {}
         self.level = level
-        self.node_symbols = ["+"]
-        self.path_symbols = ["."]
-
+        self.nodeSymbols = ['+', 'P', 'n']
+        self.pathSymbols = ['.', '-', '|', 'p']
         data = self.read_maze_file(level)
         self.create_node_table(data)
         self.connect_horizontally(data)
         self.connect_vertically(data)
-        
-    def connect_home_nodes(self, homekey, otherkey, direction):     
-        key = self.constructKey(*otherkey)
-        self.nodesLUT[homekey].neighbors[direction] = self.nodesLUT[key]
-        self.nodesLUT[key].neighbors[direction*-1] = self.nodesLUT[homekey]
+        self.homekey = None
 
+    def create_home_nodes(self, xoffset, yoffset):
+        homedata = np.array([['X','X','+','X','X'],
+                             ['X','X','.','X','X'],
+                             ['+','X','.','X','+'],
+                             ['+','.','+','.','+'],
+                             ['+','X','X','X','+']])
+
+        self.create_node_table(homedata, xoffset, yoffset)
+        self.connect_horizontally(homedata, xoffset, yoffset)
+        self.connect_vertically(homedata, xoffset, yoffset)
+        self.homekey = self.construct_key(xoffset+2, yoffset)
+        return self.homekey
+    
+    def construct_key(self, x, y):
+        return x * TILEWIDTH, y * TILEHEIGHT
+
+    def connect_home_nodes(self, homekey, otherkey, direction):     
+        key = self.construct_key(*otherkey)
+        self.node_table[homekey].neighbors[direction] = self.node_table[key]
+        self.node_table[key].neighbors[direction*-1] = self.node_table[homekey]
 
     def render(self, screen):
         for node in self.node_table.values():
@@ -47,7 +62,7 @@ class NodeGroup:
     def create_node_table(self, data: np.ndarray, xoffset=0, yoffset=0):
         for row in list(range(data.shape[0])):
             for col in list(range(data.shape[1])):
-                if data[row][col] in self.node_symbols:
+                if data[row][col] in self.nodeSymbols:
                     x, y = self.create_key(col + xoffset, row + yoffset)
                     self.node_table[(x, y)] = Node(x, y)
 
@@ -58,7 +73,7 @@ class NodeGroup:
         for row in list(range(data.shape[0])):
             key = None
             for col in list(range(data.shape[1])):
-                if data[row][col] in self.node_symbols:
+                if data[row][col] in self.nodeSymbols:
                     if key is None:
                         key = self.create_key(col + xoffset, row + yoffset)
                     else:
@@ -66,7 +81,7 @@ class NodeGroup:
                         self.node_table[key].neighbors[RIGHT] = self.node_table[otherkey]
                         self.node_table[otherkey].neighbors[LEFT] = self.node_table[key]
                         key = otherkey
-                elif data[row][col] not in self.path_symbols:
+                elif data[row][col] not in self.pathSymbols:
                     key = None
 
     def connect_vertically(self, data, xoffset=0, yoffset=0):
@@ -74,7 +89,7 @@ class NodeGroup:
         for col in list(range(dataT.shape[0])):
             key = None
             for row in list(range(dataT.shape[1])):
-                if dataT[col][row] in self.node_symbols:
+                if dataT[col][row] in self.nodeSymbols:
                     if key is None:
                         key = self.create_key(col + xoffset, row + yoffset)
                     else:
@@ -82,7 +97,7 @@ class NodeGroup:
                         self.node_table[key].neighbors[DOWN] = self.node_table[otherkey]
                         self.node_table[otherkey].neighbors[UP] = self.node_table[key]
                         key = otherkey
-                elif dataT[col][row] not in self.path_symbols:
+                elif dataT[col][row] not in self.pathSymbols:
                     key = None
 
     def node_from_pixels(self, xpixel, ypixel):

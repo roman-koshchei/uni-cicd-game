@@ -3,7 +3,7 @@ from movement.vector import Vector2
 from constants import *
 import numpy as np
 
-class Pellet:
+class Pellet(object):
     def __init__(self, row, column):
         self.name = PELLET
         self.position = Vector2(column*TILEWIDTH, row*TILEHEIGHT)
@@ -15,11 +15,11 @@ class Pellet:
         
     def render(self, screen):
         if self.visible:
-            p = self.position.asInt()
+            p = self.position.as_int()
             pygame.draw.circle(screen, self.color, p, self.radius)
 
 
-class PowerPellet:
+class PowerPellet(Pellet):
     def __init__(self, row, column):
         Pellet.__init__(self, row, column)
         self.name = POWERPELLET
@@ -34,7 +34,7 @@ class PowerPellet:
             self.visible = not self.visible
             self.timer = 0
 
-class PelletGroup:
+class PelletGroup(object):
     def __init__(self, pelletfile):
         self.pelletList = []
         self.powerpellets = []

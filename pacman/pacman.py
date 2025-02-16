@@ -4,8 +4,7 @@ from movement.vector import Vector2
 from constants import *
 from ghosts.entity import Entity
 
-
-class Pacman:
+class Pacman(Entity):
     def __init__(self, node):
         Entity.__init__(self, node)
         self.name = PACMAN
@@ -24,7 +23,7 @@ class Pacman:
         self.node = node
         self.set_position()
         self.target = node
-        self.collide_radius = 5
+        self.collideRadius = 5
 
     def eat_pellets(self, pelletList):
         for pellet in pelletList:
@@ -38,7 +37,7 @@ class Pacman:
     def collide_check(self, other):
         d = self.position - other.position
         dSquared = d.magnitude_squared()
-        rSquared = (self.collide_radius + other.collide_radius)**2
+        rSquared = (self.collideRadius + other.collideRadius)**2
         if dSquared <= rSquared:
             return True
         return False

@@ -4,9 +4,9 @@ from constants import *
 from pacman.pacman import Pacman
 from movement.nodes import NodeGroup
 from ghosts.ghost import Ghost
-from pellets.pellet import PelletGroup
+from pellets.pellets import PelletGroup
 
-class GameController:
+class GameController(object):
     def __init__(self):
         pygame.init()
         self.screen = pygame.display.set_mode(SCREENSIZE, 0, 32)
@@ -19,29 +19,24 @@ class GameController:
 
     def start_game(self):
         self.set_background()    
-        self.nodes = NodeGroup("maze.txt")
-        home_key = self.nodes.create_home_nodes(11.5, 14)
-        self.nodes.connect_home_nodes(home_key, (12,14), LEFT)
-        self.nodes.connect_home_nodes(home_key, (15,14), RIGHT)
-        self.pacman = Pacman(self.nodes.start_remp_node())
-        self.pellet = PelletGroup("maze.txt")
-        self.ghost = Ghost(self.nodes.getStartTempNode(), self.pacman)
-        self.ghost.set_spawn_node(self.nodes.get_node_from_tiles(2+11.5, 3+14))
+        self.nodes = NodeGroup("maze1.txt")
+        homekey = self.nodes.create_home_nodes(11.5, 14)
+        self.nodes.connect_home_nodes(homekey, (12,14), LEFT)
+        self.nodes.connect_home_nodes(homekey, (15,14), RIGHT)
+        self.pacman = Pacman(self.nodes.start_temp_node())
+        self.pellets = PelletGroup("maze1.txt")
+        self.ghost = Ghost(self.nodes.start_temp_node(), self.pacman)
+        self.ghost.set_spawn_node(self.nodes.node_from_tiles(2+11.5, 3+14))
 
     def update(self):
         dt = self.clock.tick(30) / 1000.0
         self.pacman.update(dt)
-        self.pellet.update(dt)
+        self.pellets.update(dt)
         self.ghost.update(dt)
         self.check_pellet_events()
         self.check_ghost_events()
         self.check_events()
         self.render()
-
-    def check_ghost_events(self):
-        if self.pacman.collide_ghost(self.ghost):
-            if self.ghost.mode.current is FREIGHT:
-               self.ghost.start_spawn()
 
     def check_events(self):
         for event in pygame.event.get():
@@ -49,17 +44,22 @@ class GameController:
                 exit()
 
     def check_pellet_events(self):
-        pellet = self.pacman.eat_pellets(self.pellets.pelletist)
+        pellet = self.pacman.eat_pellets(self.pellets.pelletList)
         if pellet:
             self.pellets.numEaten += 1
             self.pellets.pelletList.remove(pellet)
             if pellet.name == POWERPELLET:
                self.ghost.start_freight()
 
+    def check_ghost_events(self):
+        if self.pacman.collide_ghost(self.ghost):
+            if self.ghost.mode.current is FREIGHT:
+               self.ghost.start_spawn()
+
     def render(self):
         self.screen.blit(self.background, (0, 0))
         self.nodes.render(self.screen)
-        self.pellet.render(self.screen)
+        self.pellets.render(self.screen)
         self.pacman.render(self.screen)
         self.ghost.render(self.screen)
         pygame.display.update()
