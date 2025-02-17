@@ -16,9 +16,9 @@ class Ghost(Entity):
         self.mode = ModeController(self)
         self.sprite_manager = sprite_manager
         self.ghost_type = ghost_type
-        # self.animation_frame = 0
-        # self.animation_speed = 0.2  # seconds per frame
-        # self.animation_timer = 0
+        self.animation_frame = 0
+        self.animation_speed = 0.2  # seconds per frame
+        self.animation_timer = 0
     
     def update(self, dt):
         self.mode.update(dt)
