@@ -35,26 +35,27 @@ class GameController(object):
         
         # Create simple circle sprites for pellets if not found
         pellet_surface = pygame.Surface((8, 8), pygame.SRCALPHA)
-        pygame.draw.circle(pellet_surface, WHITE, (4, 4), 2)
+        pygame.draw.circle(pellet_surface, YELLOW, (4, 4), 2)
         self.sprite_manager.sprites["pellet"] = pellet_surface
         
         powerpellet_surface = pygame.Surface((16, 16), pygame.SRCALPHA)
-        pygame.draw.circle(powerpellet_surface, WHITE, (8, 8), 6)
+        pygame.draw.circle(powerpellet_surface, YELLOW, (8, 8), 6)
         self.sprite_manager.sprites["powerpellet"] = powerpellet_surface
         
         # Create simple eyes sprite for ghost spawn state if not found
         eyes_surface = pygame.Surface((32, 32), pygame.SRCALPHA)
+        dark_blue = (0, 0, 128)  # Darker blue for better visibility
         # Left eye
         pygame.draw.circle(eyes_surface, WHITE, (8, 16), 4)
-        pygame.draw.circle(eyes_surface, BLUE, (8, 16), 2)
+        pygame.draw.circle(eyes_surface, dark_blue, (8, 16), 2)
         # Right eye
         pygame.draw.circle(eyes_surface, WHITE, (24, 16), 4)
-        pygame.draw.circle(eyes_surface, BLUE, (24, 16), 2)
+        pygame.draw.circle(eyes_surface, dark_blue, (24, 16), 2)
         self.sprite_manager.sprites["ghost_eyes"] = eyes_surface
 
     def set_background(self):
         self.background = pygame.surface.Surface(SCREENSIZE).convert()
-        self.background.fill(BLACK)
+        self.background.fill(MAZE_BLACK)  # Using MAZE_BLACK for consistency
 
     def start_game(self):
         self.set_background()    

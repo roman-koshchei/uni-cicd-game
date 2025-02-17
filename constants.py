@@ -10,6 +10,8 @@ WHITE = (255, 255, 255)
 RED = (255, 0, 0)
 YELLOW = (255, 255, 0)
 BLUE = (0, 0, 255)
+MAZE_BLUE = (0, 20, 255)  # Slightly darker blue for maze walls
+MAZE_BLACK = (0, 0, 0)    # Black for paths
 
 STOP = 0
 UP = 1
@@ -18,10 +20,10 @@ LEFT = 2
 RIGHT = -2
 
 PACMAN = 0
-GHOST=3
+GHOST = 3
 
-PELLET=1
-POWERPELLET=2
+PELLET = 1
+POWERPELLET = 2
 
 # Modes for the ghosts
 SCATTER = 0

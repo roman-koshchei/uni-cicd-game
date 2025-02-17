@@ -9,14 +9,39 @@ class Node:
     def __init__(self, x, y):
         self.position = Vector2(x, y)
         self.neighbors = {UP: None, DOWN: None, LEFT: None, RIGHT: None}
-
+        
     def render(self, screen):
         for direction, neighbor in self.neighbors.items():
             if neighbor is not None:
-                line_start = self.position.as_tuple()
-                line_end = neighbor.position.as_tuple()
-                pygame.draw.line(screen, WHITE, line_start, line_end, 4)
-                pygame.draw.circle(screen, RED, self.position.as_int(), 12)
+                # Calculate the wall thickness and path width
+                wall_thickness = max(2, int(TILEWIDTH / 8))  # Thicker walls
+                path_width = int(TILEWIDTH / 2)  # Wide path
+                wall_offset = int(TILEWIDTH / 2.5)  # Offset for walls
+                
+                # Get start and end positions
+                start_pos = self.position.as_tuple()
+                end_pos = neighbor.position.as_tuple()
+                
+                # Draw the path (black)
+                pygame.draw.line(screen, MAZE_BLACK, start_pos, end_pos, path_width)
+                
+                # Draw the walls (blue)
+                if direction in [LEFT, RIGHT]:
+                    # Horizontal walls
+                    pygame.draw.line(screen, MAZE_BLUE, 
+                                   (start_pos[0], start_pos[1] - wall_offset),
+                                   (end_pos[0], end_pos[1] - wall_offset), wall_thickness)
+                    pygame.draw.line(screen, MAZE_BLUE,
+                                   (start_pos[0], start_pos[1] + wall_offset),
+                                   (end_pos[0], end_pos[1] + wall_offset), wall_thickness)
+                else:
+                    # Vertical walls
+                    pygame.draw.line(screen, MAZE_BLUE,
+                                   (start_pos[0] - wall_offset, start_pos[1]),
+                                   (end_pos[0] - wall_offset, end_pos[1]), wall_thickness)
+                    pygame.draw.line(screen, MAZE_BLUE,
+                                   (start_pos[0] + wall_offset, start_pos[1]),
+                                   (end_pos[0] + wall_offset, end_pos[1]), wall_thickness)
 
 
 class NodeGroup(object):
@@ -53,6 +78,7 @@ class NodeGroup(object):
         self.node_table[key].neighbors[direction*-1] = self.node_table[homekey]
 
     def render(self, screen):
+        # First draw all paths
         for node in self.node_table.values():
             node.render(screen)
 
