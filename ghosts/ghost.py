@@ -3,9 +3,10 @@ from movement.vector import Vector2
 from constants import *
 from .entity import Entity
 from modes.modes import ModeController
+import pygame
 
 class Ghost(Entity):
-    def __init__(self, node, pacman=None):
+    def __init__(self, node, pacman=None, sprite_manager=None, ghost_type="red"):
         Entity.__init__(self, node)
         self.name = GHOST
         self.points = 200
@@ -13,6 +14,11 @@ class Ghost(Entity):
         self.direction_method = self.goal_direction
         self.pacman = pacman
         self.mode = ModeController(self)
+        self.sprite_manager = sprite_manager
+        self.ghost_type = ghost_type
+        self.animation_frame = 0
+        self.animation_speed = 0.2  # seconds per frame
+        self.animation_timer = 0
     
     def update(self, dt):
         self.mode.update(dt)
@@ -20,6 +26,13 @@ class Ghost(Entity):
             self.scatter()
         elif self.mode.current is CHASE:
             self.chase()
+
+        # Update animation
+        self.animation_timer += dt
+        if self.animation_timer >= self.animation_speed:
+            self.animation_frame = (self.animation_frame + 1) % 2  # Assuming 2 frames per direction
+            self.animation_timer = 0
+
         Entity.update(self, dt)
 
     def scatter(self):
@@ -50,3 +63,41 @@ class Ghost(Entity):
             self.set_speed(150)
             self.direction_method = self.goal_direction
             self.spawn()
+
+    def render(self, screen):
+        if self.sprite_manager and self.visible:
+            # Determine which sprite set to use based on mode
+            if self.mode.current == FREIGHT:
+                sprite_name = "ghost_frightened"
+            elif self.mode.current == SPAWN:
+                sprite_name = "ghost_eyes"
+            else:
+                sprite_name = f"ghost_{self.ghost_type}_{self.get_direction_name()}"
+
+            # Get the appropriate sprite
+            sprite = self.sprite_manager.get_animation_frame(sprite_name, self.animation_frame)
+            
+            if sprite:
+                # Calculate position to center the sprite
+                position = (
+                    int(self.position.x - sprite.get_width() // 2),
+                    int(self.position.y - sprite.get_height() // 2)
+                )
+                screen.blit(sprite, position)
+            else:
+                # Fallback to circle if sprite not found
+                pygame.draw.circle(screen, self.color, self.position.as_int(), self.radius)
+        elif self.visible:
+            # Fallback to circle if no sprite manager
+            pygame.draw.circle(screen, self.color, self.position.as_int(), self.radius)
+
+    def get_direction_name(self):
+        if self.direction == UP:
+            return "up"
+        elif self.direction == DOWN:
+            return "down"
+        elif self.direction == LEFT:
+            return "left"
+        elif self.direction == RIGHT:
+            return "right"
+        return "right"  # Default direction when stopped

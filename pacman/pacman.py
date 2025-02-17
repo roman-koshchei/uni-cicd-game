@@ -5,7 +5,7 @@ from constants import *
 from ghosts.entity import Entity
 
 class Pacman(Entity):
-    def __init__(self, node):
+    def __init__(self, node, sprite_manager=None):
         Entity.__init__(self, node)
         self.name = PACMAN
         self.position = Vector2(200, 400)
@@ -24,6 +24,10 @@ class Pacman(Entity):
         self.set_position()
         self.target = node
         self.collideRadius = 5
+        self.sprite_manager = sprite_manager
+        self.animation_frame = 0
+        self.animation_speed = 0.15  # seconds per frame
+        self.animation_timer = 0
 
     def eat_pellets(self, pelletList):
         for pellet in pelletList:
@@ -48,6 +52,13 @@ class Pacman(Entity):
     def update(self, dt):
         self.position += self.directions[self.direction] * self.speed * dt
         direction = self.get_valid_key()
+
+        # Update animation
+        if self.direction != STOP:
+            self.animation_timer += dt
+            if self.animation_timer >= self.animation_speed:
+                self.animation_frame = (self.animation_frame + 1) % 4  # Assuming 4 frames
+                self.animation_timer = 0
 
         if self.overshot_target():
             self.node = self.target
@@ -103,4 +114,32 @@ class Pacman(Entity):
         return False
 
     def render(self, screen):
-        pygame.draw.circle(screen, self.color, self.position.as_int(), self.radius)
+        if self.sprite_manager:
+            # Get the appropriate animation frame based on direction
+            animation_name = f"pacman_{self.get_direction_name()}"
+            sprite = self.sprite_manager.get_animation_frame(animation_name, self.animation_frame)
+            
+            if sprite:
+                # Calculate position to center the sprite
+                position = (
+                    int(self.position.x - sprite.get_width() // 2),
+                    int(self.position.y - sprite.get_height() // 2)
+                )
+                screen.blit(sprite, position)
+            else:
+                # Fallback to circle if sprite not found
+                pygame.draw.circle(screen, self.color, self.position.as_int(), self.radius)
+        else:
+            # Fallback to circle if no sprite manager
+            pygame.draw.circle(screen, self.color, self.position.as_int(), self.radius)
+
+    def get_direction_name(self):
+        if self.direction == UP:
+            return "up"
+        elif self.direction == DOWN:
+            return "down"
+        elif self.direction == LEFT:
+            return "left"
+        elif self.direction == RIGHT:
+            return "right"
+        return "right"  # Default direction when stopped

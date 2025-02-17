@@ -5,6 +5,7 @@ from pacman.pacman import Pacman
 from movement.nodes import NodeGroup
 from ghosts.ghost import Ghost
 from pellets.pellets import PelletGroup
+from sprites.sprite_manager import SpriteManager
 
 class GameController(object):
     def __init__(self):
@@ -12,6 +13,54 @@ class GameController(object):
         self.screen = pygame.display.set_mode(SCREENSIZE, 0, 32)
         self.clock = pygame.time.Clock()
         self.background = None
+        self.sprite_manager = SpriteManager()
+        self.load_sprites()
+
+    def load_sprites(self):
+        # Load Pacman sprites from GIFs
+        sprite_dir = "assets/sprites"
+        
+        # Load directional animations
+        for direction in ["u", "d", "l", "r"]:
+            self.sprite_manager.load_direction_animations(sprite_dir, direction)
+            
+        # Map the direction letters to the full names for compatibility
+        self.sprite_manager.animations["pacman_up"] = self.sprite_manager.animations.get("pacman_u", [])
+        self.sprite_manager.animations["pacman_down"] = self.sprite_manager.animations.get("pacman_d", [])
+        self.sprite_manager.animations["pacman_left"] = self.sprite_manager.animations.get("pacman_l", [])
+        self.sprite_manager.animations["pacman_right"] = self.sprite_manager.animations.get("pacman_r", [])
+        
+        # Load Ghost sprites (fallback to basic shapes for now)
+        for ghost_type in ["red", "pink", "blue", "orange"]:
+            for direction in ["left", "right", "up", "down"]:
+                self.sprite_manager.load_animation(
+                    f"ghost_{ghost_type}_{direction}",
+                    f"assets/sprites/ghost_{ghost_type}_{direction}_{{}}.png",
+                    2  # 2 frames per direction
+                )
+        
+        # Load frightened ghost sprites
+        self.sprite_manager.load_animation(
+            "ghost_frightened",
+            "assets/sprites/ghost_frightened_{}.png",
+            2  # 2 frames
+        )
+        
+        # Load ghost eyes
+        self.sprite_manager.load_sprite(
+            "ghost_eyes",
+            "assets/sprites/ghost_eyes.png"
+        )
+        
+        # Load pellets
+        self.sprite_manager.load_sprite(
+            "pellet",
+            "assets/sprites/pellet.png"
+        )
+        self.sprite_manager.load_sprite(
+            "powerpellet",
+            "assets/sprites/powerpellet.png"
+        )
 
     def set_background(self):
         self.background = pygame.surface.Surface(SCREENSIZE).convert()
@@ -23,9 +72,9 @@ class GameController(object):
         homekey = self.nodes.create_home_nodes(11.5, 14)
         self.nodes.connect_home_nodes(homekey, (12,14), LEFT)
         self.nodes.connect_home_nodes(homekey, (15,14), RIGHT)
-        self.pacman = Pacman(self.nodes.start_temp_node())
-        self.pellets = PelletGroup("maze1.txt")
-        self.ghost = Ghost(self.nodes.start_temp_node(), self.pacman)
+        self.pacman = Pacman(self.nodes.start_temp_node(), self.sprite_manager)
+        self.pellets = PelletGroup("maze1.txt", self.sprite_manager)
+        self.ghost = Ghost(self.nodes.start_temp_node(), self.pacman, self.sprite_manager, "red")
         self.ghost.set_spawn_node(self.nodes.node_from_tiles(2+11.5, 3+14))
 
     def update(self):

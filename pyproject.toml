@@ -8,4 +8,5 @@ dependencies = [
     "black>=25.1.0",
     "numpy>=2.2.3",
     "pygame>=2.6.1",
+    "Pillow>=10.2.0",
 ]
