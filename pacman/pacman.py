@@ -23,7 +23,7 @@ class Pacman(Entity):
         self.node = node
         self.set_position()
         self.target = node
-        self.collideRadius = 5
+        self.collideRadius = 4
         self.sprite_manager = sprite_manager
         self.animation_frame = 0
         self.animation_speed = 0.15  # seconds per frame

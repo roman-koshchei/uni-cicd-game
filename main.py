@@ -1,11 +1,14 @@
 import pygame
 from pygame.locals import *
+import boards
 from constants import *
 from pacman.pacman import Pacman
 from movement.nodes import NodeGroup
 from ghosts.ghost import Ghost
 from pellets.pellets import PelletGroup
 from sprites.sprite_manager import SpriteManager
+import copy
+from math import pi as PI
 
 class GameController(object):
     def __init__(self):
@@ -15,6 +18,11 @@ class GameController(object):
         self.background = None
         self.sprite_manager = SpriteManager()
         self.load_sprites()
+        self.level = copy.deepcopy(boards.boards)  # Create a deep copy of the boards array
+        self.flicker = False  # Add flicker state for power pellets
+        self.timer = 0  # Timer for power pellet flicker
+        self.flicker_speed = 0.2  # Seconds between flicker states
+        
 
     def load_sprites(self):
         # Load Pacman sprites from GIFs
@@ -55,21 +63,66 @@ class GameController(object):
 
     def set_background(self):
         self.background = pygame.surface.Surface(SCREENSIZE).convert()
-        self.background.fill(MAZE_BLACK)  # Using MAZE_BLACK for consistency
+        self.background.fill(MAZE_BLACK)
 
     def start_game(self):
         self.set_background()    
-        self.nodes = NodeGroup("maze1.txt")
-        homekey = self.nodes.create_home_nodes(11.5, 14)
-        self.nodes.connect_home_nodes(homekey, (12,14), LEFT)
-        self.nodes.connect_home_nodes(homekey, (15,14), RIGHT)
+        # Use the board numbers directly
+        self.nodes = NodeGroup(self.level)
+        
+        # Initialize game objects
         self.pacman = Pacman(self.nodes.start_temp_node(), self.sprite_manager)
-        self.pellets = PelletGroup("maze1.txt", self.sprite_manager)
+        self.pellets = PelletGroup(self.level, self.sprite_manager)  # Pass the level array directly
         self.ghost = Ghost(self.nodes.start_temp_node(), self.pacman, self.sprite_manager, "red")
-        self.ghost.set_spawn_node(self.nodes.node_from_tiles(2+11.5, 3+14))
+        # Set ghost spawn position to middle of ghost house
+        self.ghost.set_spawn_node(self.nodes.node_from_tiles(14, 14))
+    
+    def draw_board(self):
+        # Use TILEWIDTH and TILEHEIGHT for consistent dimensions
+        num1 = TILEHEIGHT  # Cell height
+        num2 = TILEWIDTH  # Cell width
+        
+        for i in range(len(self.level)):
+            for j in range(len(self.level[i])):
+                x = j * num2
+                y = i * num1
+                center_x = x + (0.5 * num2)
+                center_y = y + (0.5 * num1)
+                
+                # Draw different elements based on the number in the level array
+                if self.level[i][j] == 3:  # Vertical wall
+                    pygame.draw.line(self.screen, MAZE_BLUE, (center_x, y), (center_x, y + num1), 3)
+                elif self.level[i][j] == 4:  # Horizontal wall
+                    pygame.draw.line(self.screen, MAZE_BLUE, (x, center_y), (x + num2, center_y), 3)
+                elif self.level[i][j] == 5:  # Top-right corner
+                    pygame.draw.arc(self.screen, MAZE_BLUE, 
+                                  [x - (num2 * 0.4) - 2, center_y, num2, num1],
+                                  0, PI / 2, 3)
+                elif self.level[i][j] == 6:  # Top-left corner
+                    pygame.draw.arc(self.screen, MAZE_BLUE,
+                                  [x + (num2 * 0.5), center_y, num2, num1],
+                                  PI / 2, PI, 3)
+                elif self.level[i][j] == 7:  # Bottom-left corner
+                    pygame.draw.arc(self.screen, MAZE_BLUE,
+                                  [x + (num2 * 0.5), y - (0.4 * num1), num2, num1],
+                                  PI, 3 * PI / 2, 3)
+                elif self.level[i][j] == 8:  # Bottom-right corner
+                    pygame.draw.arc(self.screen, MAZE_BLUE,
+                                  [x - (num2 * 0.4) - 2, y - (0.4 * num1), num2, num1],
+                                  3 * PI / 2, 2 * PI, 3)
+                elif self.level[i][j] == 9:  # Ghost house door
+                    pygame.draw.line(self.screen, 'white',
+                                  (x, center_y), (x + num2, center_y), 3)
 
     def update(self):
         dt = self.clock.tick(30) / 1000.0
+        
+        # Update flicker state
+        self.timer += dt
+        if self.timer >= self.flicker_speed:
+            self.flicker = not self.flicker
+            self.timer = 0
+            
         self.pacman.update(dt)
         self.pellets.update(dt)
         self.ghost.update(dt)
@@ -98,7 +151,8 @@ class GameController(object):
 
     def render(self):
         self.screen.blit(self.background, (0, 0))
-        self.nodes.render(self.screen)
+        self.draw_board() 
+        # self.nodes.render(self.screen)
         self.pellets.render(self.screen)
         self.pacman.render(self.screen)
         self.ghost.render(self.screen)
