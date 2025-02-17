@@ -11,8 +11,8 @@ class Pellet(object):
             row * TILEHEIGHT + TILEHEIGHT // 2
         )
         self.color = WHITE
-        self.radius = int(2 * TILEWIDTH / 16)
-        self.collideRadius = int(2 * TILEWIDTH / 16)
+        self.radius = int(TILEWIDTH * 0.125)
+        self.collideRadius = int(TILEWIDTH * 0.125)
         self.points = 10
         self.visible = True
         self.sprite_manager = sprite_manager
@@ -39,8 +39,8 @@ class PowerPellet(Pellet):
     def __init__(self, row, column, sprite_manager=None):
         Pellet.__init__(self, row, column, sprite_manager)
         self.name = POWERPELLET
-        self.radius = int(6 * TILEWIDTH / 16)
-        self.collideRadius = int(6 * TILEWIDTH / 16)
+        self.radius = int(TILEWIDTH * 0.35)
+        self.collideRadius = int(TILEWIDTH * 0.35)
         self.points = 50
         self.flashTime = 0.2
         self.timer = 0

@@ -42,23 +42,23 @@ class GameController(object):
         self.sprite_manager.load_ghost_animations(sprite_dir)
         
         # Create simple circle sprites for pellets if not found
-        pellet_surface = pygame.Surface((8, 8), pygame.SRCALPHA)
-        pygame.draw.circle(pellet_surface, YELLOW, (4, 4), 2)
+        pellet_surface = pygame.Surface((TILEWIDTH//2, TILEWIDTH//2), pygame.SRCALPHA)
+        pygame.draw.circle(pellet_surface, YELLOW, (TILEWIDTH//4, TILEWIDTH//4), int(TILEWIDTH * 0.125))
         self.sprite_manager.sprites["pellet"] = pellet_surface
         
-        powerpellet_surface = pygame.Surface((16, 16), pygame.SRCALPHA)
-        pygame.draw.circle(powerpellet_surface, YELLOW, (8, 8), 6)
+        powerpellet_surface = pygame.Surface((TILEWIDTH, TILEWIDTH), pygame.SRCALPHA)
+        pygame.draw.circle(powerpellet_surface, YELLOW, (TILEWIDTH//2, TILEWIDTH//2), int(TILEWIDTH * 0.35))
         self.sprite_manager.sprites["powerpellet"] = powerpellet_surface
         
         # Create simple eyes sprite for ghost spawn state if not found
-        eyes_surface = pygame.Surface((32, 32), pygame.SRCALPHA)
+        eyes_surface = pygame.Surface((TILEWIDTH, TILEWIDTH), pygame.SRCALPHA)
         dark_blue = (0, 0, 128)  # Darker blue for better visibility
         # Left eye
-        pygame.draw.circle(eyes_surface, WHITE, (8, 16), 4)
-        pygame.draw.circle(eyes_surface, dark_blue, (8, 16), 2)
+        pygame.draw.circle(eyes_surface, WHITE, (TILEWIDTH//4, TILEWIDTH//2), TILEWIDTH//4)
+        pygame.draw.circle(eyes_surface, dark_blue, (TILEWIDTH//4, TILEWIDTH//2), TILEWIDTH//8)
         # Right eye
-        pygame.draw.circle(eyes_surface, WHITE, (24, 16), 4)
-        pygame.draw.circle(eyes_surface, dark_blue, (24, 16), 2)
+        pygame.draw.circle(eyes_surface, WHITE, (3*TILEWIDTH//4, TILEWIDTH//2), TILEWIDTH//4)
+        pygame.draw.circle(eyes_surface, dark_blue, (3*TILEWIDTH//4, TILEWIDTH//2), TILEWIDTH//8)
         self.sprite_manager.sprites["ghost_eyes"] = eyes_surface
 
     def set_background(self):

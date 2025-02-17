@@ -44,11 +44,11 @@ class Ghost(Entity):
     def start_freight(self):
         self.mode.set_freight_mode()
         if self.mode.current == FREIGHT:
-            self.set_speed(50)
+            self.set_speed(40)  # Slower when frightened
             self.direction_method = self.random_direction         
 
     def normal_mode(self):
-        self.set_speed(100)
+        self.set_speed(80)  # Slightly slower than Pacman in normal mode
         self.direction_method = self.goal_direction
 
     def spawn(self):
@@ -60,7 +60,7 @@ class Ghost(Entity):
     def start_spawn(self):
         self.mode.set_spawn_mode()
         if self.mode.current == SPAWN:
-            self.set_speed(150)
+            self.set_speed(120)  # Fast but not too fast when returning to spawn
             self.direction_method = self.goal_direction
             self.spawn()
 

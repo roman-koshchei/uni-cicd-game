@@ -2,6 +2,7 @@ import pygame
 import os
 from PIL import Image
 import glob
+from constants import TILEWIDTH
 
 class SpriteManager:
     def __init__(self):
@@ -70,6 +71,9 @@ class SpriteManager:
                     sprite_str = img.tobytes()
                     sprite_size = img.size
                     sprite = pygame.image.fromstring(sprite_str, sprite_size, 'RGBA')
+                    # Scale the sprite to match tile size
+                    new_size = (TILEWIDTH, TILEWIDTH)
+                    sprite = pygame.transform.scale(sprite, new_size)
                     frames.append(sprite)
                 except Exception as e:
                     print(f"Error loading animation frame: {file} - {str(e)}")
@@ -93,6 +97,9 @@ class SpriteManager:
                     sprite_str = img.tobytes()
                     sprite_size = img.size
                     sprite = pygame.image.fromstring(sprite_str, sprite_size, 'RGBA')
+                    # Scale the sprite to match tile size
+                    new_size = (TILEWIDTH, TILEWIDTH)
+                    sprite = pygame.transform.scale(sprite, new_size)
                     frames.append(sprite)
                 except Exception as e:
                     print(f"Error loading animation frame: {file} - {str(e)}")
@@ -116,5 +123,9 @@ class SpriteManager:
         """Get a specific frame from an animation"""
         if name in self.animations:
             frames = self.animations[name]
+            if not frames:  # If frames array is empty
+                print(f"Warning: No frames found for animation '{name}'")
+                return None
             return frames[frame_index % len(frames)]
+        print(f"Warning: Animation '{name}' not found")
         return None 

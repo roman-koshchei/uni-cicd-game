@@ -142,4 +142,4 @@ class Pacman(Entity):
             return "left"
         elif self.direction == RIGHT:
             return "right"
-        return "right"  # Default direction when stopped
+        return "left"  # Default direction when stopped - changed from "right" to "left" to match initial sprite
