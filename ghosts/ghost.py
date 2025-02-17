@@ -27,11 +27,11 @@ class Ghost(Entity):
         elif self.mode.current is CHASE:
             self.chase()
 
-        # # Update animation
-        # self.animation_timer += dt
-        # if self.animation_timer >= self.animation_speed:
-        #     self.animation_frame = (self.animation_frame + 1) % 2  # Assuming 2 frames per direction
-        #     self.animation_timer = 0
+        # Update animation
+        self.animation_timer += dt
+        if self.animation_timer >= self.animation_speed:
+            self.animation_frame = (self.animation_frame + 1) % 2  # Assuming 2 frames per direction
+            self.animation_timer = 0
 
         Entity.update(self, dt)
 
