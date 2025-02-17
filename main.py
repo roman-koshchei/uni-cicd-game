@@ -20,7 +20,7 @@ class GameController(object):
         # Load Pacman sprites from GIFs
         sprite_dir = "assets/sprites"
         
-        # Load directional animations
+        # Load directional animations for Pacman
         for direction in ["u", "d", "l", "r"]:
             self.sprite_manager.load_direction_animations(sprite_dir, direction)
             
@@ -30,37 +30,27 @@ class GameController(object):
         self.sprite_manager.animations["pacman_left"] = self.sprite_manager.animations.get("pacman_l", [])
         self.sprite_manager.animations["pacman_right"] = self.sprite_manager.animations.get("pacman_r", [])
         
-        # Load Ghost sprites (fallback to basic shapes for now)
-        for ghost_type in ["red", "pink", "blue", "orange"]:
-            for direction in ["left", "right", "up", "down"]:
-                self.sprite_manager.load_animation(
-                    f"ghost_{ghost_type}_{direction}",
-                    f"assets/sprites/ghost_{ghost_type}_{direction}_{{}}.png",
-                    2  # 2 frames per direction
-                )
+        # Load Ghost animations
+        self.sprite_manager.load_ghost_animations(sprite_dir)
         
-        # Load frightened ghost sprites
-        self.sprite_manager.load_animation(
-            "ghost_frightened",
-            "assets/sprites/ghost_frightened_{}.png",
-            2  # 2 frames
-        )
+        # Create simple circle sprites for pellets if not found
+        pellet_surface = pygame.Surface((8, 8), pygame.SRCALPHA)
+        pygame.draw.circle(pellet_surface, WHITE, (4, 4), 2)
+        self.sprite_manager.sprites["pellet"] = pellet_surface
         
-        # Load ghost eyes
-        self.sprite_manager.load_sprite(
-            "ghost_eyes",
-            "assets/sprites/ghost_eyes.png"
-        )
+        powerpellet_surface = pygame.Surface((16, 16), pygame.SRCALPHA)
+        pygame.draw.circle(powerpellet_surface, WHITE, (8, 8), 6)
+        self.sprite_manager.sprites["powerpellet"] = powerpellet_surface
         
-        # Load pellets
-        self.sprite_manager.load_sprite(
-            "pellet",
-            "assets/sprites/pellet.png"
-        )
-        self.sprite_manager.load_sprite(
-            "powerpellet",
-            "assets/sprites/powerpellet.png"
-        )
+        # Create simple eyes sprite for ghost spawn state if not found
+        eyes_surface = pygame.Surface((32, 32), pygame.SRCALPHA)
+        # Left eye
+        pygame.draw.circle(eyes_surface, WHITE, (8, 16), 4)
+        pygame.draw.circle(eyes_surface, BLUE, (8, 16), 2)
+        # Right eye
+        pygame.draw.circle(eyes_surface, WHITE, (24, 16), 4)
+        pygame.draw.circle(eyes_surface, BLUE, (24, 16), 2)
+        self.sprite_manager.sprites["ghost_eyes"] = eyes_surface
 
     def set_background(self):
         self.background = pygame.surface.Surface(SCREENSIZE).convert()

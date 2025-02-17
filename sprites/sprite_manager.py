@@ -74,7 +74,37 @@ class SpriteManager:
                 except Exception as e:
                     print(f"Error loading animation frame: {file} - {str(e)}")
             if frames:
+                # Only take the first 4 frames if we have more
+                frames = frames[:4]
                 self.animations[f"pacman_{direction}"] = frames
+                return True
+        return False
+
+    def load_ghost_animations(self, base_path):
+        """Load ghost animation frames"""
+        pattern = os.path.join(base_path, "ghost *.gif")
+        files = sorted(glob.glob(pattern))
+        if files:
+            frames = []
+            for file in files:
+                try:
+                    img = Image.open(file)
+                    img = img.convert('RGBA')
+                    sprite_str = img.tobytes()
+                    sprite_size = img.size
+                    sprite = pygame.image.fromstring(sprite_str, sprite_size, 'RGBA')
+                    frames.append(sprite)
+                except Exception as e:
+                    print(f"Error loading animation frame: {file} - {str(e)}")
+            if frames:
+                # Store the ghost animation frames
+                self.animations["ghost"] = frames
+                # Use the same frames for all ghost types and directions
+                for ghost_type in ["red", "pink", "blue", "orange"]:
+                    for direction in ["up", "down", "left", "right"]:
+                        self.animations[f"ghost_{ghost_type}_{direction}"] = frames
+                # Use for frightened state too
+                self.animations["ghost_frightened"] = frames
                 return True
         return False
     
