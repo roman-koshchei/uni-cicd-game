@@ -6,7 +6,7 @@ import numpy as np
 
 
 class Node:
-    def __init__(self, x, y):
+    def __init__(self, x: int, y: int):
         self.position = Vector2(x, y)
         self.neighbors = {UP: None, DOWN: None, LEFT: None, RIGHT: None}
 
@@ -15,9 +15,9 @@ class NodeGroup(object):
     def __init__(self, level_data):
         self.node_table: Dict[Tuple[int, int], Node] = {}
         # Numbers that represent walkable paths (dots, power pellets, and empty spaces)
-        self.nodeSymbols = [0, 1, 2]
+        self.node_symbols = [0, 1, 2]
         # Numbers that represent walls and gates
-        self.wallSymbols = [3, 4, 5, 6, 7, 8, 9]
+        self.wall_symbols = [3, 4, 5, 6, 7, 8, 9]
 
         data = np.array(level_data)
         self.create_node_table(data)
@@ -31,7 +31,7 @@ class NodeGroup(object):
     def create_node_table(self, data: np.ndarray, xoffset=0, yoffset=0):
         for row in list(range(data.shape[0])):
             for col in list(range(data.shape[1])):
-                if data[row][col] in self.nodeSymbols:
+                if data[row][col] in self.node_symbols:
                     x, y = self.create_key(col + xoffset, row + yoffset)
                     self.node_table[(x, y)] = Node(x, y)
 
@@ -39,7 +39,7 @@ class NodeGroup(object):
         for row in list(range(data.shape[0])):
             key = None
             for col in list(range(data.shape[1])):
-                if data[row][col] in self.nodeSymbols:  # If it's a walkable space
+                if data[row][col] in self.node_symbols:  # If it's a walkable space
                     if key is None:
                         key = self.create_key(col + xoffset, row + yoffset)
                     else:
@@ -49,7 +49,7 @@ class NodeGroup(object):
                         ]
                         self.node_table[otherkey].neighbors[LEFT] = self.node_table[key]
                         key = otherkey
-                elif data[row][col] in self.wallSymbols:  # If it's a wall
+                elif data[row][col] in self.wall_symbols:  # If it's a wall
                     key = None
 
     def connect_vertically(self, data, xoffset=0, yoffset=0):
@@ -57,7 +57,7 @@ class NodeGroup(object):
         for col in list(range(dataT.shape[0])):
             key = None
             for row in list(range(dataT.shape[1])):
-                if dataT[col][row] in self.nodeSymbols:  # If it's a walkable space
+                if dataT[col][row] in self.node_symbols:  # If it's a walkable space
                     if key is None:
                         key = self.create_key(col + xoffset, row + yoffset)
                     else:
@@ -65,7 +65,7 @@ class NodeGroup(object):
                         self.node_table[key].neighbors[DOWN] = self.node_table[otherkey]
                         self.node_table[otherkey].neighbors[UP] = self.node_table[key]
                         key = otherkey
-                elif dataT[col][row] in self.wallSymbols:  # If it's a wall
+                elif dataT[col][row] in self.wall_symbols:  # If it's a wall
                     key = None
 
     def node_from_pixels(self, xpixel, ypixel):

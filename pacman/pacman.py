@@ -1,12 +1,16 @@
 import pygame
 from pygame.locals import *
+from ghosts.ghost import Ghost
+from movement.nodes import Node
 from movement.vector import Vector2
 from constants import *
 from ghosts.entity import Entity
+from pellets.pellets import Pellet
+from sprites.sprite_manager import SpriteManager
 
 
 class Pacman(Entity):
-    def __init__(self, node, sprite_manager=None):
+    def __init__(self, node: Node, sprite_manager: SpriteManager | None = None):
         Entity.__init__(self, node)
         self.name = PACMAN
         self.position = Vector2(200, 400)
@@ -30,22 +34,21 @@ class Pacman(Entity):
         self.animation_speed = 0.15  # seconds per frame
         self.animation_timer = 0
 
-    def eat_pellets(self, pelletList):
-        for pellet in pelletList:
+    def eat_pellets(self, pellet_list: list[Pellet]):
+        for pellet in pellet_list:
             if self.collide_check(pellet):
                 return pellet
         return None
 
-    def collide_ghost(self, ghost):
+    def collide_ghost(self, ghost: Ghost):
         return self.collide_check(ghost)
 
     def collide_check(self, other):
         d = self.position - other.position
         dSquared = d.magnitude_squared()
         rSquared = (self.collideRadius + other.collideRadius) ** 2
-        if dSquared <= rSquared:
-            return True
-        return False
+
+        return dSquared <= rSquared
 
     def set_position(self):
         self.position = self.node.position.copy()

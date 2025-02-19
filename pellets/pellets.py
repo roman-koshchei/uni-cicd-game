@@ -3,9 +3,13 @@ from movement.vector import Vector2
 from constants import *
 import numpy as np
 
+from sprites.sprite_manager import SpriteManager
+
 
 class Pellet(object):
-    def __init__(self, row, column, sprite_manager=None):
+    def __init__(
+        self, row: int, column: int, sprite_manager: SpriteManager | None = None
+    ):
         self.name = PELLET
         self.position = Vector2(
             column * TILEWIDTH + TILEWIDTH // 2, row * TILEHEIGHT + TILEHEIGHT // 2
@@ -71,14 +75,15 @@ class PowerPellet(Pellet):
 
 class PelletGroup(object):
     def __init__(self, level_data, sprite_manager=None):
-        self.pelletList = []
-        self.powerpellets = []
-        self.sprite_manager = sprite_manager
+        self.pellet_list: list[Pellet] = []
+        self.power_pellet_list: list[PowerPellet] = []
+        self.sprite_manager: SpriteManager = sprite_manager
+        self.eaten_count = 0
+
         self.create_pellet_list(level_data)
-        self.numEaten = 0
 
     def update(self, dt):
-        for powerpellet in self.powerpellets:
+        for powerpellet in self.power_pellet_list:
             powerpellet.update(dt)
 
     def create_pellet_list(self, level_data):
@@ -91,18 +96,18 @@ class PelletGroup(object):
 
         for row in range(data.shape[0]):
             for col in range(data.shape[1]):
-                if data[row][col] == 1:  # Regular pellet
-                    self.pelletList.append(Pellet(row, col, self.sprite_manager))
-                elif data[row][col] == 2:  # Power pellet
+                cell = data[row][col]
+
+                if cell == PELLET:
+                    self.pellet_list.append(Pellet(row, col, self.sprite_manager))
+                elif cell == POWERPELLET:
                     pp = PowerPellet(row, col, self.sprite_manager)
-                    self.pelletList.append(pp)
-                    self.powerpellets.append(pp)
+                    self.pellet_list.append(pp)
+                    self.power_pellet_list.append(pp)
 
     def is_empty(self):
-        if len(self.pelletList) == 0:
-            return True
-        return False
+        return len(self.pellet_list) == 0
 
     def render(self, screen):
-        for pellet in self.pelletList:
+        for pellet in self.pellet_list:
             pellet.render(screen)

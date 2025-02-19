@@ -8,7 +8,7 @@ from constants import TILEWIDTH
 class SpriteManager:
     def __init__(self):
         self.sprites = {}
-        self.animations = {}
+        self.animations: dict[str, any] = {}
 
     def load_sprite(self, name, path, scale=1):
         """Load a single sprite"""
@@ -122,7 +122,7 @@ class SpriteManager:
         """Get a single sprite by name"""
         return self.sprites.get(name)
 
-    def get_animation_frame(self, name, frame_index):
+    def get_animation_frame(self, name: str, frame_index: int):
         """Get a specific frame from an animation"""
         if name in self.animations:
             frames = self.animations[name]

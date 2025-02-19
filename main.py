@@ -14,6 +14,7 @@ from math import pi as PI
 class GameController(object):
     def __init__(self):
         pygame.init()
+
         self.screen = pygame.display.set_mode(SCREENSIZE, 0, 32)
         self.clock = pygame.time.Clock()
         self.background = None
@@ -115,65 +116,88 @@ class GameController(object):
         self.ghost.set_spawn_node(self.nodes.node_from_tiles(14, 14))
 
     def draw_board(self):
-        # Use TILEWIDTH and TILEHEIGHT for consistent dimensions
-        num1 = TILEHEIGHT  # Cell height
-        num2 = TILEWIDTH  # Cell width
+        cell_height = TILEHEIGHT
+        cell_width = TILEWIDTH
 
         for i in range(len(self.level)):
             for j in range(len(self.level[i])):
-                x = j * num2
-                y = i * num1
-                center_x = x + (0.5 * num2)
-                center_y = y + (0.5 * num1)
+                x = j * cell_width
+                y = i * cell_height
+                center_x = x + (0.5 * cell_width)
+                center_y = y + (0.5 * cell_height)
+
+                cell = self.level[i][j]
 
                 # Draw different elements based on the number in the level array
-                if self.level[i][j] == 3:  # Vertical wall
+                if cell == 3:  # Vertical wall
                     pygame.draw.line(
-                        self.screen, MAZE_BLUE, (center_x, y), (center_x, y + num1), 3
+                        self.screen,
+                        MAZE_BLUE,
+                        (center_x, y),
+                        (center_x, y + cell_height),
+                        3,
                     )
-                elif self.level[i][j] == 4:  # Horizontal wall
+                elif cell == 4:  # Horizontal wall
                     pygame.draw.line(
-                        self.screen, MAZE_BLUE, (x, center_y), (x + num2, center_y), 3
+                        self.screen,
+                        MAZE_BLUE,
+                        (x, center_y),
+                        (x + cell_width, center_y),
+                        3,
                     )
-                elif self.level[i][j] == 5:  # Top-right corner
+                elif cell == 5:  # Top-right corner
                     pygame.draw.arc(
                         self.screen,
                         MAZE_BLUE,
-                        [x - (num2 * 0.4) - 2, center_y, num2, num1],
+                        [x - (cell_width * 0.4) - 2, center_y, cell_width, cell_height],
                         0,
                         PI / 2,
                         3,
                     )
-                elif self.level[i][j] == 6:  # Top-left corner
+                elif cell == 6:  # Top-left corner
                     pygame.draw.arc(
                         self.screen,
                         MAZE_BLUE,
-                        [x + (num2 * 0.5), center_y, num2, num1],
+                        [x + (cell_width * 0.5), center_y, cell_width, cell_height],
                         PI / 2,
                         PI,
                         3,
                     )
-                elif self.level[i][j] == 7:  # Bottom-left corner
+                elif cell == 7:  # Bottom-left corner
                     pygame.draw.arc(
                         self.screen,
                         MAZE_BLUE,
-                        [x + (num2 * 0.5), y - (0.4 * num1), num2, num1],
+                        [
+                            x + (cell_width * 0.5),
+                            y - (0.4 * cell_height),
+                            cell_width,
+                            cell_height,
+                        ],
                         PI,
                         3 * PI / 2,
                         3,
                     )
-                elif self.level[i][j] == 8:  # Bottom-right corner
+                elif cell == 8:  # Bottom-right corner
                     pygame.draw.arc(
                         self.screen,
                         MAZE_BLUE,
-                        [x - (num2 * 0.4) - 2, y - (0.4 * num1), num2, num1],
+                        [
+                            x - (cell_width * 0.4) - 2,
+                            y - (0.4 * cell_height),
+                            cell_width,
+                            cell_height,
+                        ],
                         3 * PI / 2,
                         2 * PI,
                         3,
                     )
-                elif self.level[i][j] == 9:  # Ghost house door
+                elif cell == 9:  # Ghost house door
                     pygame.draw.line(
-                        self.screen, "white", (x, center_y), (x + num2, center_y), 3
+                        self.screen,
+                        "white",
+                        (x, center_y),
+                        (x + cell_width, center_y),
+                        3,
                     )
 
     def update(self):
@@ -188,28 +212,28 @@ class GameController(object):
         self.pacman.update(dt)
         self.pellets.update(dt)
         self.ghost.update(dt)
-        self.check_pellet_events()
-        self.check_ghost_events()
-        self.check_events()
-        self.render()
 
-    def check_events(self):
+        # Pellet events
+        pellet = self.pacman.eat_pellets(self.pellets.pellet_list)
+        if pellet:
+            self.pellets.eaten_count += 1
+            self.pellets.pellet_list.remove(pellet)
+            if pellet.name == POWERPELLET:
+                self.ghost.start_freight()
+
+        # Ghost events
+        if self.pacman.collide_ghost(self.ghost):
+            if self.ghost.mode.current is FREIGHT:
+                self.ghost.start_spawn()
+            else:
+                print("Pacman should be dead")
+
+        # Pygame events
         for event in pygame.event.get():
             if event.type == QUIT:
                 exit()
 
-    def check_pellet_events(self):
-        pellet = self.pacman.eat_pellets(self.pellets.pelletList)
-        if pellet:
-            self.pellets.numEaten += 1
-            self.pellets.pelletList.remove(pellet)
-            if pellet.name == POWERPELLET:
-                self.ghost.start_freight()
-
-    def check_ghost_events(self):
-        if self.pacman.collide_ghost(self.ghost):
-            if self.ghost.mode.current is FREIGHT:
-                self.ghost.start_spawn()
+        self.render()
 
     def render(self):
         self.screen.blit(self.background, (0, 0))

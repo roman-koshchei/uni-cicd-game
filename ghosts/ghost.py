@@ -1,13 +1,22 @@
 from pygame.locals import *
+from movement.nodes import Node
 from movement.vector import Vector2
 from constants import *
+from pacman.pacman import Pacman
+from sprites.sprite_manager import SpriteManager
 from .entity import Entity
 from modes.modes import ModeController
 import pygame
 
 
 class Ghost(Entity):
-    def __init__(self, node, pacman=None, sprite_manager=None, ghost_type="red"):
+    def __init__(
+        self,
+        node: Node,
+        pacman: Pacman | None = None,
+        sprite_manager: SpriteManager | None = None,
+        ghost_type="red",
+    ):
         Entity.__init__(self, node)
         self.name = GHOST
         self.points = 200
@@ -55,10 +64,10 @@ class Ghost(Entity):
         self.direction_method = self.goal_direction
 
     def spawn(self):
-        self.goal = self.spawnNode.position
+        self.goal = self.spawn_node.position
 
     def set_spawn_node(self, node):
-        self.spawnNode = node
+        self.spawn_node = node
 
     def start_spawn(self):
         self.mode.set_spawn_mode()
