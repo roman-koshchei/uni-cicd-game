@@ -1,14 +1,15 @@
-import pygame
 import numpy as np
 from typing import Dict, Tuple
 from movement.vector import Vector2
 from constants import *
 import numpy as np
 
+
 class Node:
     def __init__(self, x, y):
         self.position = Vector2(x, y)
         self.neighbors = {UP: None, DOWN: None, LEFT: None, RIGHT: None}
+
 
 class NodeGroup(object):
     def __init__(self, level_data):
@@ -17,12 +18,12 @@ class NodeGroup(object):
         self.nodeSymbols = [0, 1, 2]
         # Numbers that represent walls and gates
         self.wallSymbols = [3, 4, 5, 6, 7, 8, 9]
-        
+
         data = np.array(level_data)
         self.create_node_table(data)
         self.connect_horizontally(data)
         self.connect_vertically(data)
-    
+
     def create_key(self, x: int, y: int):
         # Center the node in the middle of the tile
         return (x * TILEWIDTH + TILEWIDTH // 2), (y * TILEHEIGHT + TILEHEIGHT // 2)
@@ -43,7 +44,9 @@ class NodeGroup(object):
                         key = self.create_key(col + xoffset, row + yoffset)
                     else:
                         otherkey = self.create_key(col + xoffset, row + yoffset)
-                        self.node_table[key].neighbors[RIGHT] = self.node_table[otherkey]
+                        self.node_table[key].neighbors[RIGHT] = self.node_table[
+                            otherkey
+                        ]
                         self.node_table[otherkey].neighbors[LEFT] = self.node_table[key]
                         key = otherkey
                 elif data[row][col] in self.wallSymbols:  # If it's a wall

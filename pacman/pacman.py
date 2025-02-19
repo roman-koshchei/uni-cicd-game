@@ -4,6 +4,7 @@ from movement.vector import Vector2
 from constants import *
 from ghosts.entity import Entity
 
+
 class Pacman(Entity):
     def __init__(self, node, sprite_manager=None):
         Entity.__init__(self, node)
@@ -34,14 +35,14 @@ class Pacman(Entity):
             if self.collide_check(pellet):
                 return pellet
         return None
-    
+
     def collide_ghost(self, ghost):
         return self.collide_check(ghost)
 
     def collide_check(self, other):
         d = self.position - other.position
         dSquared = d.magnitude_squared()
-        rSquared = (self.collideRadius + other.collideRadius)**2
+        rSquared = (self.collideRadius + other.collideRadius) ** 2
         if dSquared <= rSquared:
             return True
         return False
@@ -57,7 +58,9 @@ class Pacman(Entity):
         if self.direction != STOP:
             self.animation_timer += dt
             if self.animation_timer >= self.animation_speed:
-                self.animation_frame = (self.animation_frame + 1) % 4  # Assuming 4 frames
+                self.animation_frame = (
+                    self.animation_frame + 1
+                ) % 4  # Assuming 4 frames
                 self.animation_timer = 0
 
         if self.overshot_target():
@@ -117,18 +120,22 @@ class Pacman(Entity):
         if self.sprite_manager:
             # Get the appropriate animation frame based on direction
             animation_name = f"pacman_{self.get_direction_name()}"
-            sprite = self.sprite_manager.get_animation_frame(animation_name, self.animation_frame)
-            
+            sprite = self.sprite_manager.get_animation_frame(
+                animation_name, self.animation_frame
+            )
+
             if sprite:
                 # Calculate position to center the sprite
                 position = (
                     int(self.position.x - sprite.get_width() // 2),
-                    int(self.position.y - sprite.get_height() // 2)
+                    int(self.position.y - sprite.get_height() // 2),
                 )
                 screen.blit(sprite, position)
             else:
                 # Fallback to circle if sprite not found
-                pygame.draw.circle(screen, self.color, self.position.as_int(), self.radius)
+                pygame.draw.circle(
+                    screen, self.color, self.position.as_int(), self.radius
+                )
         else:
             # Fallback to circle if no sprite manager
             pygame.draw.circle(screen, self.color, self.position.as_int(), self.radius)

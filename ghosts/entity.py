@@ -4,11 +4,17 @@ from movement.vector import Vector2
 from constants import *
 from random import randint
 
+
 class Entity(object):
     def __init__(self, node):
         self.name = None
-        self.directions = {UP:Vector2(0, -1),DOWN:Vector2(0, 1), 
-                          LEFT:Vector2(-1, 0), RIGHT:Vector2(1, 0), STOP:Vector2()}
+        self.directions = {
+            UP: Vector2(0, -1),
+            DOWN: Vector2(0, 1),
+            LEFT: Vector2(-1, 0),
+            RIGHT: Vector2(1, 0),
+            STOP: Vector2(),
+        }
         self.direction = STOP
         self.set_speed(100)
         self.radius = int(TILEWIDTH * 0.75)
@@ -22,8 +28,8 @@ class Entity(object):
         self.direction_method = self.random_direction
 
     def update(self, dt):
-        self.position += self.directions[self.direction]*self.speed*dt
-         
+        self.position += self.directions[self.direction] * self.speed * dt
+
         if self.overshot_target():
             self.node = self.target
             directions = self.valid_directions()
@@ -47,11 +53,11 @@ class Entity(object):
         return directions
 
     def random_direction(self, directions):
-        return directions[randint(0, len(directions)-1)]
+        return directions[randint(0, len(directions) - 1)]
 
     def set_position(self):
         self.position = self.node.position.copy()
-          
+
     def valid_direction(self, direction):
         if direction is not STOP:
             if self.node.neighbors[direction] is not None:
@@ -77,7 +83,7 @@ class Entity(object):
         temp = self.node
         self.node = self.target
         self.target = temp
-        
+
     def opposite_direction(self, direction):
         if direction is not STOP:
             if direction == self.direction * -1:
@@ -90,7 +96,9 @@ class Entity(object):
     def goal_direction(self, directions):
         distances = []
         for direction in directions:
-            vec = self.node.position  + self.directions[direction]*TILEWIDTH - self.goal
+            vec = (
+                self.node.position + self.directions[direction] * TILEWIDTH - self.goal
+            )
             distances.append(vec.magnitude_squared())
         index = distances.index(min(distances))
         return directions[index]

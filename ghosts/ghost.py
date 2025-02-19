@@ -5,6 +5,7 @@ from .entity import Entity
 from modes.modes import ModeController
 import pygame
 
+
 class Ghost(Entity):
     def __init__(self, node, pacman=None, sprite_manager=None, ghost_type="red"):
         Entity.__init__(self, node)
@@ -19,7 +20,7 @@ class Ghost(Entity):
         self.animation_frame = 0
         self.animation_speed = 0.2  # seconds per frame
         self.animation_timer = 0
-    
+
     def update(self, dt):
         self.mode.update(dt)
         if self.mode.current is SCATTER:
@@ -30,7 +31,9 @@ class Ghost(Entity):
         # Update animation
         self.animation_timer += dt
         if self.animation_timer >= self.animation_speed:
-            self.animation_frame = (self.animation_frame + 1) % 2  # Assuming 2 frames per direction
+            self.animation_frame = (
+                self.animation_frame + 1
+            ) % 2  # Assuming 2 frames per direction
             self.animation_timer = 0
 
         Entity.update(self, dt)
@@ -45,7 +48,7 @@ class Ghost(Entity):
         self.mode.set_freight_mode()
         if self.mode.current == FREIGHT:
             self.set_speed(40)  # Slower when frightened
-            self.direction_method = self.random_direction         
+            self.direction_method = self.random_direction
 
     def normal_mode(self):
         self.set_speed(80)  # Slightly slower than Pacman in normal mode
@@ -75,18 +78,22 @@ class Ghost(Entity):
                 sprite_name = f"ghost_{self.ghost_type}_{self.get_direction_name()}"
 
             # Get the appropriate sprite
-            sprite = self.sprite_manager.get_animation_frame(sprite_name, self.animation_frame)
-            
+            sprite = self.sprite_manager.get_animation_frame(
+                sprite_name, self.animation_frame
+            )
+
             if sprite:
                 # Calculate position to center the sprite
                 position = (
                     int(self.position.x - sprite.get_width() // 2),
-                    int(self.position.y - sprite.get_height() // 2)
+                    int(self.position.y - sprite.get_height() // 2),
                 )
                 screen.blit(sprite, position)
             else:
                 # Fallback to circle if sprite not found
-                pygame.draw.circle(screen, self.color, self.position.as_int(), self.radius)
+                pygame.draw.circle(
+                    screen, self.color, self.position.as_int(), self.radius
+                )
         elif self.visible:
             # Fallback to circle if no sprite manager
             pygame.draw.circle(screen, self.color, self.position.as_int(), self.radius)

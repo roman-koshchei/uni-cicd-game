@@ -3,12 +3,12 @@ from movement.vector import Vector2
 from constants import *
 import numpy as np
 
+
 class Pellet(object):
     def __init__(self, row, column, sprite_manager=None):
         self.name = PELLET
         self.position = Vector2(
-            column * TILEWIDTH + TILEWIDTH // 2,
-            row * TILEHEIGHT + TILEHEIGHT // 2
+            column * TILEWIDTH + TILEWIDTH // 2, row * TILEHEIGHT + TILEHEIGHT // 2
         )
         self.color = WHITE
         self.radius = int(TILEWIDTH * 0.125)
@@ -16,7 +16,7 @@ class Pellet(object):
         self.points = 10
         self.visible = True
         self.sprite_manager = sprite_manager
-        
+
     def render(self, screen):
         if self.visible:
             if self.sprite_manager:
@@ -24,7 +24,7 @@ class Pellet(object):
                 if sprite:
                     position = (
                         int(self.position.x - sprite.get_width() // 2),
-                        int(self.position.y - sprite.get_height() // 2)
+                        int(self.position.y - sprite.get_height() // 2),
                     )
                     screen.blit(sprite, position)
                 else:
@@ -44,7 +44,7 @@ class PowerPellet(Pellet):
         self.points = 50
         self.flashTime = 0.2
         self.timer = 0
-        
+
     def update(self, dt):
         self.timer += dt
         if self.timer >= self.flashTime:
@@ -58,7 +58,7 @@ class PowerPellet(Pellet):
                 if sprite:
                     position = (
                         int(self.position.x - sprite.get_width() // 2),
-                        int(self.position.y - sprite.get_height() // 2)
+                        int(self.position.y - sprite.get_height() // 2),
                     )
                     screen.blit(sprite, position)
                 else:
@@ -67,6 +67,7 @@ class PowerPellet(Pellet):
             else:
                 p = self.position.as_int()
                 pygame.draw.circle(screen, self.color, p, self.radius)
+
 
 class PelletGroup(object):
     def __init__(self, level_data, sprite_manager=None):
@@ -79,11 +80,15 @@ class PelletGroup(object):
     def update(self, dt):
         for powerpellet in self.powerpellets:
             powerpellet.update(dt)
-                
+
     def create_pellet_list(self, level_data):
         # Convert to numpy array if it's not already
-        data = np.array(level_data) if not isinstance(level_data, np.ndarray) else level_data
-        
+        data = (
+            np.array(level_data)
+            if not isinstance(level_data, np.ndarray)
+            else level_data
+        )
+
         for row in range(data.shape[0]):
             for col in range(data.shape[1]):
                 if data[row][col] == 1:  # Regular pellet
@@ -92,12 +97,12 @@ class PelletGroup(object):
                     pp = PowerPellet(row, col, self.sprite_manager)
                     self.pelletList.append(pp)
                     self.powerpellets.append(pp)
-    
+
     def is_empty(self):
         if len(self.pelletList) == 0:
             return True
         return False
-    
+
     def render(self, screen):
         for pellet in self.pelletList:
             pellet.render(screen)

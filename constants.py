@@ -11,7 +11,7 @@ RED = (255, 0, 0)
 YELLOW = (255, 255, 0)
 BLUE = (0, 0, 255)
 MAZE_BLUE = (0, 20, 255)  # Slightly darker blue for maze walls
-MAZE_BLACK = (0, 0, 0)    # Black for paths
+MAZE_BLACK = (0, 0, 0)  # Black for paths
 
 STOP = 0
 UP = 1
