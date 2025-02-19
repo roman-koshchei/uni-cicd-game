@@ -11,8 +11,8 @@ class Entity(object):
                           LEFT:Vector2(-1, 0), RIGHT:Vector2(1, 0), STOP:Vector2()}
         self.direction = STOP
         self.set_speed(100)
-        self.radius = 10
-        self.collideRadius = 5
+        self.radius = int(TILEWIDTH * 0.75)
+        self.collideRadius = int(TILEWIDTH * 0.55)
         self.color = WHITE
         self.node = node
         self.set_position()

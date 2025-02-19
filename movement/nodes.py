@@ -10,54 +10,22 @@ class Node:
         self.position = Vector2(x, y)
         self.neighbors = {UP: None, DOWN: None, LEFT: None, RIGHT: None}
 
-    def render(self, screen):
-        for direction, neighbor in self.neighbors.items():
-            if neighbor is not None:
-                line_start = self.position.as_tuple()
-                line_end = neighbor.position.as_tuple()
-                pygame.draw.line(screen, WHITE, line_start, line_end, 4)
-                pygame.draw.circle(screen, RED, self.position.as_int(), 12)
-
-
 class NodeGroup(object):
-    def __init__(self, level: str):
+    def __init__(self, level_data):
         self.node_table: Dict[Tuple[int, int], Node] = {}
-        self.level = level
-        self.nodeSymbols = ['+', 'P', 'n']
-        self.pathSymbols = ['.', '-', '|', 'p']
-        data = self.read_maze_file(level)
+        # Numbers that represent walkable paths (dots, power pellets, and empty spaces)
+        self.nodeSymbols = [0, 1, 2]
+        # Numbers that represent walls and gates
+        self.wallSymbols = [3, 4, 5, 6, 7, 8, 9]
+        
+        data = np.array(level_data)
         self.create_node_table(data)
         self.connect_horizontally(data)
         self.connect_vertically(data)
-        self.homekey = None
-
-    def create_home_nodes(self, xoffset, yoffset):
-        homedata = np.array([['X','X','+','X','X'],
-                             ['X','X','.','X','X'],
-                             ['+','X','.','X','+'],
-                             ['+','.','+','.','+'],
-                             ['+','X','X','X','+']])
-
-        self.create_node_table(homedata, xoffset, yoffset)
-        self.connect_horizontally(homedata, xoffset, yoffset)
-        self.connect_vertically(homedata, xoffset, yoffset)
-        self.homekey = self.construct_key(xoffset+2, yoffset)
-        return self.homekey
     
-    def construct_key(self, x, y):
-        return x * TILEWIDTH, y * TILEHEIGHT
-
-    def connect_home_nodes(self, homekey, otherkey, direction):     
-        key = self.construct_key(*otherkey)
-        self.node_table[homekey].neighbors[direction] = self.node_table[key]
-        self.node_table[key].neighbors[direction*-1] = self.node_table[homekey]
-
-    def render(self, screen):
-        for node in self.node_table.values():
-            node.render(screen)
-
-    def read_maze_file(self, file: str):
-        return np.loadtxt(file, dtype="<U1")
+    def create_key(self, x: int, y: int):
+        # Center the node in the middle of the tile
+        return (x * TILEWIDTH + TILEWIDTH // 2), (y * TILEHEIGHT + TILEHEIGHT // 2)
 
     def create_node_table(self, data: np.ndarray, xoffset=0, yoffset=0):
         for row in list(range(data.shape[0])):
@@ -66,14 +34,11 @@ class NodeGroup(object):
                     x, y = self.create_key(col + xoffset, row + yoffset)
                     self.node_table[(x, y)] = Node(x, y)
 
-    def create_key(self, x: int, y: int):
-        return x * TILEWIDTH, y * TILEHEIGHT
-
     def connect_horizontally(self, data, xoffset=0, yoffset=0):
         for row in list(range(data.shape[0])):
             key = None
             for col in list(range(data.shape[1])):
-                if data[row][col] in self.nodeSymbols:
+                if data[row][col] in self.nodeSymbols:  # If it's a walkable space
                     if key is None:
                         key = self.create_key(col + xoffset, row + yoffset)
                     else:
@@ -81,7 +46,7 @@ class NodeGroup(object):
                         self.node_table[key].neighbors[RIGHT] = self.node_table[otherkey]
                         self.node_table[otherkey].neighbors[LEFT] = self.node_table[key]
                         key = otherkey
-                elif data[row][col] not in self.pathSymbols:
+                elif data[row][col] in self.wallSymbols:  # If it's a wall
                     key = None
 
     def connect_vertically(self, data, xoffset=0, yoffset=0):
@@ -89,7 +54,7 @@ class NodeGroup(object):
         for col in list(range(dataT.shape[0])):
             key = None
             for row in list(range(dataT.shape[1])):
-                if dataT[col][row] in self.nodeSymbols:
+                if dataT[col][row] in self.nodeSymbols:  # If it's a walkable space
                     if key is None:
                         key = self.create_key(col + xoffset, row + yoffset)
                     else:
@@ -97,7 +62,7 @@ class NodeGroup(object):
                         self.node_table[key].neighbors[DOWN] = self.node_table[otherkey]
                         self.node_table[otherkey].neighbors[UP] = self.node_table[key]
                         key = otherkey
-                elif dataT[col][row] not in self.pathSymbols:
+                elif dataT[col][row] in self.wallSymbols:  # If it's a wall
                     key = None
 
     def node_from_pixels(self, xpixel, ypixel):
