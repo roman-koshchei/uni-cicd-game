@@ -4,7 +4,7 @@ import boards
 from constants import *
 from pacman.pacman import Pacman
 from movement.nodes import NodeGroup
-from ghosts.ghost import Ghost
+from ghosts.ghost import GhostGroup
 from pellets.pellets import PelletGroup
 from sprites.sprite_manager import SpriteManager
 import copy
@@ -109,11 +109,10 @@ class GameController(object):
         self.pellets = PelletGroup(
             self.level, self.sprite_manager
         )  # Pass the level array directly
-        self.ghost = Ghost(
-            self.nodes.start_temp_node(), self.pacman, self.sprite_manager, "red"
-        )
+
+        self.ghosts = GhostGroup(self.nodes.start_temp_node(), self.pacman)
         # Set ghost spawn position to middle of ghost house
-        self.ghost.set_spawn_node(self.nodes.node_from_tiles(14, 14))
+        self.ghosts.set_spawn_node(self.nodes.node_from_tiles(14, 14))
 
     def draw_board(self):
         cell_height = TILEHEIGHT
@@ -211,7 +210,7 @@ class GameController(object):
 
         self.pacman.update(dt)
         self.pellets.update(dt)
-        self.ghost.update(dt)
+        self.ghosts.update(dt)
 
         # Pellet events
         pellet = self.pacman.eat_pellets(self.pellets.pellet_list)
@@ -219,14 +218,13 @@ class GameController(object):
             self.pellets.eaten_count += 1
             self.pellets.pellet_list.remove(pellet)
             if pellet.name == POWERPELLET:
-                self.ghost.start_freight()
+                self.ghosts.start_freight()
 
         # Ghost events
-        if self.pacman.collide_ghost(self.ghost):
-            if self.ghost.mode.current is FREIGHT:
-                self.ghost.start_spawn()
-            else:
-                print("Pacman should be dead")
+        for ghost in self.ghosts:
+            if self.pacman.collide_ghost(ghost):
+                if ghost.mode.current is FREIGHT:
+                    ghost.start_spawn()
 
         # Pygame events
         for event in pygame.event.get():
@@ -241,7 +239,7 @@ class GameController(object):
         # self.nodes.render(self.screen)
         self.pellets.render(self.screen)
         self.pacman.render(self.screen)
-        self.ghost.render(self.screen)
+        self.ghosts.render(self.screen)
         pygame.display.update()
 
 

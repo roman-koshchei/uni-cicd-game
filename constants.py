@@ -10,6 +10,9 @@ WHITE = (255, 255, 255)
 RED = (255, 0, 0)
 YELLOW = (255, 255, 0)
 BLUE = (0, 0, 255)
+PINK = (255, 100, 150)
+TEAL = (100, 255, 255)
+ORANGE = (230, 190, 40)
 MAZE_BLUE = (0, 20, 255)  # Slightly darker blue for maze walls
 MAZE_BLACK = (0, 0, 0)  # Black for paths
 
@@ -21,6 +24,10 @@ RIGHT = -2
 
 PACMAN = 0
 GHOST = 3
+BLINKY = 4
+PINKY = 5
+INKY = 6
+CLYDE = 7
 
 PELLET = 1
 POWERPELLET = 2
