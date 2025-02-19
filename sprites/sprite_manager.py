@@ -7,7 +7,7 @@ from constants import TILEWIDTH
 
 class SpriteManager:
     def __init__(self):
-        self.sprites = {}
+        self.sprites: dict[str, any] = {}
         self.animations: dict[str, any] = {}
 
     def load_sprite(self, name, path, scale=1):

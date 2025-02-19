@@ -91,6 +91,9 @@ class Ghost(Entity):
                 sprite_name, self.animation_frame
             )
 
+            if sprite is None:
+                sprite = self.sprite_manager.get_sprite(sprite_name)
+
             if sprite:
                 # Calculate position to center the sprite
                 position = (

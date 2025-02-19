@@ -1,6 +1,5 @@
 import pygame
 from pygame.locals import *
-from ghosts.ghost import Ghost
 from movement.nodes import Node
 from movement.vector import Vector2
 from constants import *
@@ -40,7 +39,7 @@ class Pacman(Entity):
                 return pellet
         return None
 
-    def collide_ghost(self, ghost: Ghost):
+    def collide_ghost(self, ghost):
         return self.collide_check(ghost)
 
     def collide_check(self, other):
