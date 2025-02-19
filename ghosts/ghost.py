@@ -16,7 +16,7 @@ class Ghost(Entity):
         pacman: Pacman | None = None,
         sprite_manager: SpriteManager | None = None,
         ghost_type="red",
-        blinky = None,
+        blinky=None,
     ):
         Entity.__init__(self, node)
         self.name = GHOST
@@ -189,12 +189,26 @@ class Clyde(Ghost):
 
 
 class GhostGroup(object):
-    def __init__(self, node, pacman):
-        self.blinky = Blinky(node, pacman)
-        self.pinky = Pinky(node, pacman)
-        self.inky = Inky(node, pacman, self.blinky)
-        self.clyde = Clyde(node, pacman)
-        self.ghosts: list[Ghost] = [self.blinky, self.pinky, self.inky, self.clyde]
+    def __init__(self, node, pacman, count: int):
+        if(count <1): count = 4
+        
+        self.ghosts: list[Ghost] = []
+
+        if(count >= 1):
+            self.blinky = Blinky(node, pacman)
+            self.ghosts.append(self.blinky)
+        
+        if(count >= 2):
+            self.pinky = Pinky(node, pacman)
+            self.ghosts.append(self.pinky)
+        
+        if(count >= 3):
+            self.inky = Inky(node, pacman, self.blinky)
+            self.ghosts.append(self.inky)
+
+        if(count >= 4):
+            self.clyde = Clyde(node, pacman)
+            self.ghosts.append(self.clyde)
 
     def __iter__(self):
         return iter(self.ghosts)

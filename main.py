@@ -9,12 +9,15 @@ from pellets.pellets import PelletGroup
 from sprites.sprite_manager import SpriteManager
 import copy
 from math import pi as PI
+import argparse
 
 
 class GameController(object):
-    def __init__(self):
+    def __init__(self, bgcolor: tuple[int, int, int], ghost_count: int):
         pygame.init()
 
+        self.bgcolor = bgcolor
+        self.ghost_count = ghost_count
         self.screen = pygame.display.set_mode(SCREENSIZE, 0, 32)
         self.clock = pygame.time.Clock()
         self.background = None
@@ -97,7 +100,7 @@ class GameController(object):
 
     def set_background(self):
         self.background = pygame.surface.Surface(SCREENSIZE).convert()
-        self.background.fill(MAZE_BLACK)
+        self.background.fill(self.bgcolor)  # MAZE_BLACK)
 
     def start_game(self):
         self.set_background()
@@ -110,7 +113,7 @@ class GameController(object):
             self.level, self.sprite_manager
         )  # Pass the level array directly
 
-        self.ghosts = GhostGroup(self.nodes.start_temp_node(), self.pacman)
+        self.ghosts = GhostGroup(self.nodes.start_temp_node(), self.pacman, self.ghost_count)
         # Set ghost spawn position to middle of ghost house
         self.ghosts.set_spawn_node(self.nodes.node_from_tiles(14, 14))
 
@@ -243,8 +246,38 @@ class GameController(object):
         pygame.display.update()
 
 
+def parse_args():
+    parser = argparse.ArgumentParser(description="Pac-Man Game Configuration")
+
+    parser.add_argument(
+        "--ghosts",
+        type=int,
+        choices=range(1, 5),
+        default=4,
+        help="Number of ghosts (1 to 4, inclusive). Default is 4.",
+    )
+
+    parser.add_argument(
+        "--bgcolor",
+        type=int,
+        nargs=3,
+        metavar=("R", "G", "B"),
+        default=[0, 0, 0],
+        help="Background color as three integers (0-255). Default is black (0, 0, 0).",
+    )
+
+    args = parser.parse_args()
+
+    # Validate RGB values
+    if any(c < 0 or c > 255 for c in args.bgcolor):
+        parser.error("RGB values must be in the range 0-255.")
+
+    return args
+
+
 if __name__ == "__main__":
-    game = GameController()
+    args = parse_args()
+    game = GameController(bgcolor=args.bgcolor, ghost_count=args.ghosts)
     game.start_game()
     while True:
         game.update()
