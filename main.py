@@ -71,7 +71,7 @@ class GameController(object):
         self.background = self.background_norm
 
     def startGame(self):
-        self.mazedata.loadMaze(self.level) #maze\maze1.txt
+        self.mazedata.loadMaze(self.level)
         self.mazesprites = MazeSprites("maze\\" + self.mazedata.obj.name+".txt", "maze\\" + self.mazedata.obj.name+"_rotation.txt")
         self.setBackground()
         self.nodes = NodeGroup("maze\\" + self.mazedata.obj.name+".txt")
