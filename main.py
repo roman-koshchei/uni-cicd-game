@@ -1,3 +1,4 @@
+import argparse
 import pygame
 from pygame.locals import *
 from constants import *
@@ -13,8 +14,9 @@ from styles.sprite.sprites import MazeSprites
 from maze.mazedata import MazeData
 
 class GameController(object):
-    def __init__(self):
+    def __init__(self, bgcolor: tuple[int, int, int]):
         pygame.init()
+        self.background_color = bgcolor
         self.screen = pygame.display.set_mode(SCREENSIZE, 0, 32)
         self.background = None
         self.background_norm = None
@@ -62,9 +64,9 @@ class GameController(object):
 
     def setBackground(self):
         self.background_norm = pygame.surface.Surface(SCREENSIZE).convert()
-        self.background_norm.fill(BLACK)
+        self.background_norm.fill(self.background_color)
         self.background_flash = pygame.surface.Surface(SCREENSIZE).convert()
-        self.background_flash.fill(BLACK)
+        self.background_flash.fill(self.background_color)
         self.background_norm = self.mazesprites.constructBackground(self.background_norm, self.level%5)
         self.background_flash = self.mazesprites.constructBackground(self.background_flash, 5)
         self.flashBG = False
@@ -230,9 +232,32 @@ class GameController(object):
             self.screen.blit(self.fruitCaptured[i], (x, y))
         pygame.display.update()
 
-    
+
+def parse_args():
+    parser = argparse.ArgumentParser(description="Pac-Man Game Configuration")
+
+    parser.add_argument(
+        "--bgcolor",
+        type=int,
+        nargs=3,
+        metavar=("R", "G", "B"),
+        default=[0, 0, 0],
+        help="Background color as three integers (0-255). Default is black (0, 0, 0).",
+    )
+
+    args = parser.parse_args()
+
+    # Validate RGB values
+    if any(c < 0 or c > 255 for c in args.bgcolor):
+        parser.error("RGB values must be in the range 0-255.")
+
+    return args
+
+
 if __name__ == "__main__":
-    game = GameController()
+    args = parse_args()
+
+    game = GameController(args.bgcolor)
     game.startGame()
     while True:
         game.update()
