@@ -1,154 +1,122 @@
 import pygame
 from pygame.locals import *
-from movement.nodes import Node
 from movement.vector import Vector2
 from constants import *
 from ghosts.entity import Entity
-from pellets.pellets import Pellet
-from sprites.sprite_manager import SpriteManager
-
+from styles.sprite.sprites import PacmanSprites
 
 class Pacman(Entity):
-    def __init__(self, node: Node, sprite_manager: SpriteManager | None = None):
-        Entity.__init__(self, node)
+    def __init__(self, node):
+        Entity.__init__(self, node )
         self.name = PACMAN
-        self.position = Vector2(200, 400)
-        self.directions = {
-            UP: Vector2(0, -1),
-            DOWN: Vector2(0, 1),
-            LEFT: Vector2(-1, 0),
-            RIGHT: Vector2(1, 0),
-            STOP: Vector2(),
-        }
+        self.directions = {STOP:Vector2(), UP:Vector2(0,-1), DOWN:Vector2(0,1), LEFT:Vector2(-1,0), RIGHT:Vector2(1,0)}
         self.direction = STOP
-        self.speed = 100
+        self.speed = 100 * TILEWIDTH/16
         self.radius = 10
         self.color = YELLOW
+        self.direction = LEFT
+        self.setBetweenNodes(LEFT)
         self.node = node
-        self.set_position()
+        # self.setPosition()
         self.target = node
-        self.collideRadius = 4
-        self.sprite_manager = sprite_manager
-        self.animation_frame = 0
-        self.animation_speed = 0.15  # seconds per frame
-        self.animation_timer = 0
+        self.collideRadius = 5
+        self.alive = True
+        self.sprites = PacmanSprites(self)
+        self.reset()  #add to all previous
+        
 
-    def eat_pellets(self, pellet_list: list[Pellet]):
-        for pellet in pellet_list:
-            if self.collide_check(pellet):
-                return pellet
-        return None
-
-    def collide_ghost(self, ghost):
-        return self.collide_check(ghost)
-
-    def collide_check(self, other):
-        d = self.position - other.position
-        dSquared = d.magnitude_squared()
-        rSquared = (self.collideRadius + other.collideRadius) ** 2
-
-        return dSquared <= rSquared
-
-    def set_position(self):
+    def setPosition(self):
         self.position = self.node.position.copy()
 
+    def reset(self):
+        Entity.reset(self)
+        self.direction = LEFT
+        self.setBetweenNodes(LEFT)
+        self.alive = True
+        self.image = self.sprites.getStartImage()
+        self.sprites.reset()
+
+    def die(self):
+        self.alive = False
+        self.direction = STOP
+
     def update(self, dt):
-        self.position += self.directions[self.direction] * self.speed * dt
-        direction = self.get_valid_key()
-
-        # Update animation
-        if self.direction != STOP:
-            self.animation_timer += dt
-            if self.animation_timer >= self.animation_speed:
-                self.animation_frame = (
-                    self.animation_frame + 1
-                ) % 4  # Assuming 4 frames
-                self.animation_timer = 0
-
-        if self.overshot_target():
+        self.sprites.update(dt)	
+        self.position += self.directions[self.direction]*self.speed*dt
+        direction = self.getValidKey()
+        if self.overshotTarget():
             self.node = self.target
-            self.target = self.get_new_target(direction)
-
+            if self.node.neighbors[PORTAL] is not None:
+                self.node = self.node.neighbors[PORTAL]
+            self.target = self.getNewTarget(direction)
             if self.target is not self.node:
                 self.direction = direction
             else:
-                self.target = self.get_new_target(self.direction)
-
+                self.target = self.getNewTarget(self.direction)
             if self.target is self.node:
                 self.direction = STOP
-
-            self.set_position()
-        else:
-            if self.is_opposite_direction(direction):
-                self.reverse_direction()
-
-    def is_valid_direction(self, direction):
-        return direction is not STOP and self.node.neighbors[direction] is not None
-
-    def get_new_target(self, direction):
-        return (
-            self.node.neighbors[direction]
-            if self.is_valid_direction(direction)
-            else self.node
-        )
-
-    def get_valid_key(self):
-        key_pressed = pygame.key.get_pressed()
-        if key_pressed[K_UP] or key_pressed[K_w]:
-            return UP
-        if key_pressed[K_DOWN] or key_pressed[K_s]:
-            return DOWN
-        if key_pressed[K_LEFT] or key_pressed[K_a]:
-            return LEFT
-        if key_pressed[K_RIGHT] or key_pressed[K_d]:
-            return RIGHT
-        return STOP
-
-    def reverse_direction(self):
-        self.direction *= -1
-        self.node, self.target = self.target, self.node
-
-    def is_opposite_direction(self, direction):
-        return direction is not STOP and direction == -self.direction
-
-    def overshot_target(self):
-        if self.target:
-            vec1 = self.target.position - self.node.position
-            vec2 = self.position - self.node.position
-            return vec2.magnitude_squared() >= vec1.magnitude_squared()
+            self.setPosition()
+        else: 
+            if self.oppositeDirection(direction):
+                self.reverseDirection()
+        
+    def validDirection(self, direction):
+        if direction is not STOP:
+            if self.node.neighbors[direction] is not None:
+                return True
         return False
 
-    def render(self, screen):
-        if self.sprite_manager:
-            # Get the appropriate animation frame based on direction
-            animation_name = f"pacman_{self.get_direction_name()}"
-            sprite = self.sprite_manager.get_animation_frame(
-                animation_name, self.animation_frame
-            )
+    def getNewTarget(self, direction):
+        if self.validDirection(direction):
+            return self.node.neighbors[direction]
+        return self.node
 
-            if sprite:
-                # Calculate position to center the sprite
-                position = (
-                    int(self.position.x - sprite.get_width() // 2),
-                    int(self.position.y - sprite.get_height() // 2),
-                )
-                screen.blit(sprite, position)
-            else:
-                # Fallback to circle if sprite not found
-                pygame.draw.circle(
-                    screen, self.color, self.position.as_int(), self.radius
-                )
-        else:
-            # Fallback to circle if no sprite manager
-            pygame.draw.circle(screen, self.color, self.position.as_int(), self.radius)
+    def getValidKey(self):
+        key_pressed = pygame.key.get_pressed()
+        if key_pressed[K_UP]:
+            return UP
+        if key_pressed[K_DOWN]:
+            return DOWN
+        if key_pressed[K_LEFT]:
+            return LEFT
+        if key_pressed[K_RIGHT]:
+            return RIGHT
+        return STOP
+    
+    def overshotTarget(self):
+        if self.target is not None:
+            vec1 = self.target.position - self.node.position
+            vec2 = self.position - self.node.position
+            node2Target = vec1.magnitudeSquared()
+            node2Self = vec2.magnitudeSquared()
+            return node2Self >= node2Target
+        return False
+    
+    def reverseDirection(self):
+        self.direction *= -1
+        temp = self.node
+        self.node = self.target
+        self.target = temp
 
-    def get_direction_name(self):
-        if self.direction == UP:
-            return "up"
-        elif self.direction == DOWN:
-            return "down"
-        elif self.direction == LEFT:
-            return "left"
-        elif self.direction == RIGHT:
-            return "right"
-        return "left"  # Default direction when stopped - changed from "right" to "left" to match initial sprite
+    def oppositeDirection(self, direction):
+        if direction is not STOP:
+            if direction == self.direction * -1:
+                return True
+        return False
+    
+    def eatPellets(self, pelletList):
+        for pellet in pelletList:
+            if self.collideCheck(pellet):
+                return pellet
+        return None
+    
+    def collideGhost(self, ghost):
+        return self.collideCheck(ghost)
+
+    def collideCheck(self, other):
+        d = self.position - other.position
+        dSquared = d.magnitudeSquared()
+        rSquared = (self.collideRadius + other.collideRadius)**2
+        if dSquared <= rSquared:
+            return True
+        return False
