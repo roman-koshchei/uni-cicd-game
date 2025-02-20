@@ -5,13 +5,20 @@ from constants import *
 from ghosts.entity import Entity
 from styles.sprite.sprites import PacmanSprites
 
+
 class Pacman(Entity):
     def __init__(self, node):
-        Entity.__init__(self, node )
+        Entity.__init__(self, node)
         self.name = PACMAN
-        self.directions = {STOP:Vector2(), UP:Vector2(0,-1), DOWN:Vector2(0,1), LEFT:Vector2(-1,0), RIGHT:Vector2(1,0)}
+        self.directions = {
+            STOP: Vector2(),
+            UP: Vector2(0, -1),
+            DOWN: Vector2(0, 1),
+            LEFT: Vector2(-1, 0),
+            RIGHT: Vector2(1, 0),
+        }
         self.direction = STOP
-        self.speed = 100 * TILEWIDTH/16
+        self.speed = 100 * TILEWIDTH / 16
         self.radius = 10
         self.color = YELLOW
         self.direction = LEFT
@@ -22,8 +29,7 @@ class Pacman(Entity):
         self.collideRadius = 5
         self.alive = True
         self.sprites = PacmanSprites(self)
-        self.reset()  #add to all previous
-        
+        self.reset()  # add to all previous
 
     def setPosition(self):
         self.position = self.node.position.copy()
@@ -41,8 +47,8 @@ class Pacman(Entity):
         self.direction = STOP
 
     def update(self, dt):
-        self.sprites.update(dt)	
-        self.position += self.directions[self.direction]*self.speed*dt
+        self.sprites.update(dt)
+        self.position += self.directions[self.direction] * self.speed * dt
         direction = self.getValidKey()
         if self.overshotTarget():
             self.node = self.target
@@ -56,10 +62,10 @@ class Pacman(Entity):
             if self.target is self.node:
                 self.direction = STOP
             self.setPosition()
-        else: 
+        else:
             if self.oppositeDirection(direction):
                 self.reverseDirection()
-        
+
     def validDirection(self, direction):
         if direction is not STOP:
             if self.node.neighbors[direction] is not None:
@@ -82,7 +88,7 @@ class Pacman(Entity):
         if key_pressed[K_RIGHT] or key_pressed[K_d]:
             return RIGHT
         return STOP
-    
+
     def overshotTarget(self):
         if self.target is not None:
             vec1 = self.target.position - self.node.position
@@ -91,7 +97,7 @@ class Pacman(Entity):
             node2Self = vec2.magnitudeSquared()
             return node2Self >= node2Target
         return False
-    
+
     def reverseDirection(self):
         self.direction *= -1
         temp = self.node
@@ -103,20 +109,20 @@ class Pacman(Entity):
             if direction == self.direction * -1:
                 return True
         return False
-    
+
     def eatPellets(self, pelletList):
         for pellet in pelletList:
             if self.collideCheck(pellet):
                 return pellet
         return None
-    
+
     def collideGhost(self, ghost):
         return self.collideCheck(ghost)
 
     def collideCheck(self, other):
         d = self.position - other.position
         dSquared = d.magnitudeSquared()
-        rSquared = (self.collideRadius + other.collideRadius)**2
+        rSquared = (self.collideRadius + other.collideRadius) ** 2
         if dSquared <= rSquared:
             return True
         return False

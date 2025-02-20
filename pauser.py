@@ -4,7 +4,7 @@ class Pause(object):
         self.timer = 0
         self.pauseTime = None
         self.func = None
-        
+
     def update(self, dt):
         if self.pauseTime is not None:
             self.timer += dt
