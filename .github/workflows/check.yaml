@@ -23,45 +23,38 @@ jobs:
       - name: Run linting with Black
         run: |
           uv run black . --check
-          uv run black . --diff > reports/black_report.txt || true
+          uv run black . --diff > reports/black.txt || true
         continue-on-error: true
-
-      - name: Create report directories
-        run: |
-          mkdir -p reports/black
-          mkdir -p reports/pytest
 
       - name: Generate Black HTML report
         run: |
-          echo "<html><head><title>Black Linting Report</title></head><body><pre>" > reports/black/index.html
-          cat reports/black_report.txt >> reports/black/index.html || echo "No Black output available" >> reports/black/index.html
-          echo "</pre></body></html>" >> reports/black/index.html
+          echo "<html><head><title>Black Linting Report</title></head><body><pre>" > reports/black.html
+          cat reports/black.txt >> reports/black.html || echo "No Black output available" >> reports/black.html
+          echo "</pre></body></html>" >> reports/black.html
         continue-on-error: true
 
       - name: Run tests with HTML report
-        run: uv run pytest tests --html=reports/pytest/report.html --self-contained-html
+        run: uv run pytest tests --html=reports/pytest.html --self-contained-html
         continue-on-error: true
 
       - name: Check if reports exist
         run: |
           ls -la reports/
-          ls -la reports/pytest || echo "pytest reports directory is empty"
-          ls -la reports/black || echo "black reports directory is empty"
-          touch reports/pytest/index.html || mkdir -p reports/pytest && touch reports/pytest/index.html
-          touch reports/black/index.html || mkdir -p reports/black && touch reports/black/index.html
+          touch reports/pytest.html 
+          touch reports/black.html
 
       - name: Upload test report
         uses: actions/upload-pages-artifact@v3
         if: always()
         with:
-          name: pytest-report
-          path: reports/pytest
+          name: pytest
+          path: reports/pytest.html
           retention-days: 14
 
       - name: Upload linting report
         uses: actions/upload-pages-artifact@v3
         if: always()
         with:
-          name: black-report
-          path: reports/black
+          name: black
+          path: reports/black.html
           retention-days: 14
