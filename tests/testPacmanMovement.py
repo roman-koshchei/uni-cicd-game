@@ -3,7 +3,6 @@ from unittest.mock import Mock
 
 class TestPacmanMovement(unittest.TestCase):
     def setUp(self):
-        # Припускаємо, що у вас є класи для гри Pacman
         # Це заглушки, які потрібно замінити на реальний код
         self.maze = Mock()
         self.maze.is_valid_position = lambda x, y: 0 <= x < 10 and 0 <= y < 10
