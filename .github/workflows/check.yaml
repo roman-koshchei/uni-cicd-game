@@ -22,8 +22,7 @@ jobs:
 
       - name: Run linting with Black
         run: |
-          uv run black . --check
-          uv run black . --diff > reports/black.txt || true
+          uv run black . --check --diff > reports/black.txt || true
         continue-on-error: true
 
       - name: Generate Black HTML report
