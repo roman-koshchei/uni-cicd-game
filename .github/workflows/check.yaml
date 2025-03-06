@@ -30,7 +30,9 @@ jobs:
           uv run flake8 --format=html --htmldir=reports/flake8 .
 
       - name: Run tests with HTML report
-        run: uv run pytest tests --html=reports/pytest/report.html --self-contained-html
+        run: |
+          mkdir -p reports/pytest
+          uv run pytest tests --html=reports/pytest/report.html --self-contained-html
 
       - name: Upload test report
         uses: actions/upload-pages-artifact@v3
