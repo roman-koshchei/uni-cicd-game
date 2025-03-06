@@ -27,6 +27,7 @@ jobs:
 
       - name: Generate Black HTML report
         run: |
+          touch reports/black.html
           echo "<html><head><title>Black Linting Report</title></head><body><pre>" > reports/black.html
           cat reports/black.txt >> reports/black.html || echo "No Black output available" >> reports/black.html
           echo "</pre></body></html>" >> reports/black.html
