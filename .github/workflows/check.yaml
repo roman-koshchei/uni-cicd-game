@@ -33,7 +33,7 @@ jobs:
         run: uv run pytest tests --html=reports/pytest/report.html --self-contained-html
 
       - name: Upload test report
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-pages-artifact@v3
         if: always()  # This ensures reports are uploaded even if tests fail
         with:
           name: pytest-report
@@ -41,7 +41,7 @@ jobs:
           retention-days: 14
 
       - name: Upload lint report
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-pages-artifact@v3
         if: always()  # This ensures reports are uploaded even if linting fails
         with:
           name: flake8-report
