@@ -1,0 +1,63 @@
+name: Lint and Test
+
+on: [push]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+
+      - name: Install the project
+        run: |
+          uv sync --all-extras --dev
+
+      - name: Add reports directory
+        run: mkdir reports
+
+      - name: Run linting with Black
+        run: |
+          uv run black . --check --diff >> reports/black.txt
+        continue-on-error: true
+
+      - name: Generate Black HTML report
+        run: |
+          touch reports/black.html
+          echo "<html><head><title>Black Linting Report</title></head><body><pre>" >> reports/black.html
+          cat reports/black.txt >> reports/black.html || echo "No Black output available" >> reports/black.html
+          echo "</pre></body></html>" >> reports/black.html
+        continue-on-error: true
+
+      - name: Run tests with HTML report
+        run: uv run pytest tests --html=reports/pytest.html --self-contained-html
+        continue-on-error: true
+
+      - name: Check if reports exist
+        run: |
+          ls -la reports/
+          touch reports/pytest.html 
+          touch reports/black.html
+
+      - name: Upload test report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pytest
+          path: reports/pytest.html
+          retention-days: 14
+
+      - name: Upload linting report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: black
+          path: reports/black.html
+          retention-days: 14
