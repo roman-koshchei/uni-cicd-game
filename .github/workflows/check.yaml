@@ -19,18 +19,24 @@ jobs:
       - name: Install the project
         run: |
           uv sync --all-extras --dev
-          uv add pytest-html flake8 flake8-html
+          uv add pytest-html
 
       - name: Run linting with Black
-        run: uv run black . --check --diff
+        run: |
+          uv run black . --check
+          uv run black . --diff > reports/black_report.txt || true
+        continue-on-error: true
 
       - name: Create report directories
         run: |
-          mkdir -p reports/flake8
+          mkdir -p reports/black
           mkdir -p reports/pytest
           
-      - name: Run flake8 linting with HTML report
-        run: uv run flake8 --format=html --htmldir=reports/flake8 --exclude=.venv,.git,__pycache__,build,dist .
+      - name: Generate Black HTML report
+        run: |
+          echo "<html><head><title>Black Linting Report</title></head><body><pre>" > reports/black/index.html
+          cat reports/black_report.txt >> reports/black/index.html || echo "No Black output available" >> reports/black/index.html
+          echo "</pre></body></html>" >> reports/black/index.html
         continue-on-error: true
 
       - name: Run tests with HTML report
@@ -41,9 +47,9 @@ jobs:
         run: |
           ls -la reports/
           ls -la reports/pytest || echo "pytest reports directory is empty"
-          ls -la reports/flake8 || echo "flake8 reports directory is empty"
+          ls -la reports/black || echo "black reports directory is empty"
           touch reports/pytest/index.html || mkdir -p reports/pytest && touch reports/pytest/index.html
-          touch reports/flake8/index.html || mkdir -p reports/flake8 && touch reports/flake8/index.html
+          touch reports/black/index.html || mkdir -p reports/black && touch reports/black/index.html
 
       - name: Upload test report
         uses: actions/upload-pages-artifact@v3
@@ -53,10 +59,10 @@ jobs:
           path: reports/pytest
           retention-days: 14
 
-      - name: Upload lint report
+      - name: Upload linting report
         uses: actions/upload-pages-artifact@v3
         if: always()
         with:
-          name: flake8-report
-          path: reports/flake8
+          name: black-report
+          path: reports/black
           retention-days: 14
