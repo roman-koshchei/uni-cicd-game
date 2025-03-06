@@ -19,7 +19,6 @@ jobs:
       - name: Install the project
         run: |
           uv sync --all-extras --dev
-          uv add pytest-html
 
       - name: Run linting with Black
         run: |
@@ -31,7 +30,7 @@ jobs:
         run: |
           mkdir -p reports/black
           mkdir -p reports/pytest
-          
+
       - name: Generate Black HTML report
         run: |
           echo "<html><head><title>Black Linting Report</title></head><body><pre>" > reports/black/index.html
