@@ -17,10 +17,33 @@ jobs:
           cache-dependency-glob: "uv.lock"
 
       - name: Install the project
-        run: uv sync --all-extras --dev
+        run: |
+          uv sync --all-extras --dev
+          uv add pytest-html flake8 flake8-html
 
-      - name: Run linting
+      - name: Run linting with Black
         run: uv run black . --check --diff
 
-      - name: Run tests
-        run: uv run pytest tests
+      - name: Run flake8 linting with HTML report
+        run: |
+          mkdir -p reports/flake8
+          uv run flake8 --format=html --htmldir=reports/flake8 .
+
+      - name: Run tests with HTML report
+        run: uv run pytest tests --html=reports/pytest/report.html --self-contained-html
+
+      - name: Upload test report
+        uses: actions/upload-artifact@v3
+        if: always()  # This ensures reports are uploaded even if tests fail
+        with:
+          name: pytest-report
+          path: reports/pytest
+          retention-days: 14
+
+      - name: Upload lint report
+        uses: actions/upload-artifact@v3
+        if: always()  # This ensures reports are uploaded even if linting fails
+        with:
+          name: flake8-report
+          path: reports/flake8
+          retention-days: 14
