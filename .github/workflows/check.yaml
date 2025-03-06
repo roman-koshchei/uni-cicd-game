@@ -1,9 +1,9 @@
-name: Lint
+name: Lint and Test
 
 on: [push]
 
 jobs:
-  lint:
+  lint_and_test:
     runs-on: ubuntu-latest
 
     steps:
@@ -12,9 +12,15 @@ jobs:
 
       - name: Install uv
         uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
 
       - name: Install the project
         run: uv sync --all-extras --dev
 
-      - name: Run Black linting
+      - name: Run linting
         run: uv run black . --check --diff
+
+      - name: Run tests
+        run: uv run pytest tests
