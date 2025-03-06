@@ -20,9 +20,12 @@ jobs:
         run: |
           uv sync --all-extras --dev
 
+      - name: Add reports directory
+        run: mkdir reports
+
       - name: Run linting with Black
         run: |
-          uv run black . --check --diff >> reports/black.txt || true
+          uv run black . --check --diff >> reports/black.txt
         continue-on-error: true
 
       - name: Generate Black HTML report
