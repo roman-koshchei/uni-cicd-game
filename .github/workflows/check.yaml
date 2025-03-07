@@ -20,8 +20,12 @@ jobs:
         run: |
           uv sync --all-extras --dev
 
+      # - name: Install test dependencies
+      #   run: |
+      #     uv pip install pytest-cov pytest-html
+
       - name: Add reports directory
-        run: mkdir reports
+        run: mkdir -p reports/coverage
 
       - name: Run linting with Black
         run: |
@@ -36,8 +40,15 @@ jobs:
           echo "</pre></body></html>" >> reports/black.html
         continue-on-error: true
 
-      - name: Run tests with HTML report
-        run: uv run pytest tests --html=reports/pytest.html --self-contained-html
+      - name: Run tests with coverage and HTML report
+        run: |
+          uv run pytest tests \
+            --html=reports/pytest.html \
+            --self-contained-html \
+            --cov=. \
+            --cov-report=html:reports/coverage \
+            --cov-report=term \
+            --cov-report=xml:reports/coverage.xml
         continue-on-error: true
 
       - name: Check if reports exist
@@ -52,6 +63,14 @@ jobs:
         with:
           name: pytest
           path: reports/pytest.html
+          retention-days: 14
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage
+          path: reports/coverage/
           retention-days: 14
 
       - name: Upload linting report
