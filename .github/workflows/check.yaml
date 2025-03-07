@@ -20,9 +20,9 @@ jobs:
         run: |
           uv sync --all-extras --dev
 
-      - name: Install test dependencies
-        run: |
-          uv pip install pytest-cov pytest-html
+      # - name: Install test dependencies
+      #   run: |
+      #     uv pip install pytest-cov pytest-html
 
       - name: Add reports directory
         run: mkdir -p reports/coverage
@@ -79,4 +79,4 @@ jobs:
         with:
           name: black
           path: reports/black.html
-          retention-days: 14 
+          retention-days: 14
