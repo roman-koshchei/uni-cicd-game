@@ -15,13 +15,16 @@ from ghosts.ghost import Ghost, GhostGroup
 from food.pellets import Pellet, PowerPellet, PelletGroup
 from constants import *
 
+
 @pytest.fixture
 def vector():
     return Vector2(5, 10)
 
+
 @pytest.fixture
 def node():
     return Node(100, 200)
+
 
 @pytest.fixture
 def connected_nodes():
@@ -31,45 +34,39 @@ def connected_nodes():
     down = Node(100, 132)
     left = Node(68, 100)
     right = Node(132, 100)
-    
+
     # Connect nodes
     center.neighbors[UP] = up
     center.neighbors[DOWN] = down
     center.neighbors[LEFT] = left
     center.neighbors[RIGHT] = right
-    
+
     up.neighbors[DOWN] = center
     down.neighbors[UP] = center
     left.neighbors[RIGHT] = center
     right.neighbors[LEFT] = center
-    
-    return {
-        'center': center,
-        'up': up,
-        'down': down,
-        'left': left,
-        'right': right
-    }
+
+    return {"center": center, "up": up, "down": down, "left": left, "right": right}
+
 
 @pytest.fixture
 def entity(node):
     return Entity(node)
 
+
 @pytest.fixture
 def pacman(node):
     return Pacman(node)
 
+
 @pytest.fixture
 def mock_pellet_data():
     """Create a mock pellet data array for testing"""
-    return np.array([
-        ['.', '.', 'P'],
-        ['.', ' ', ' '],
-        ['P', ' ', '.']
-    ])
+    return np.array([[".", ".", "P"], [".", " ", " "], ["P", " ", "."]])
+
 
 @pytest.fixture
 def mock_screen():
     """Create a mock pygame screen for testing rendering"""
     pygame.init()
-    return pygame.Surface((800, 600)) 
+    return pygame.Surface((800, 600))
